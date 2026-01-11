@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>feel · 选你的饭</title>
+
+  <style>
+    :root{
+      --bg:#f5f5f7;
+      --card:rgba(255,255,255,.92);
+      --stroke:rgba(0,0,0,.08);
+      --text:#111;
+      --muted:#6e6e73;
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+      --shadow2:0 2px 10px rgba(0,0,0,.06);
+      --radius:24px;
+      --pad:18px;
+      --ease:cubic-bezier(.2,.9,.2,1);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",
+        "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow-x:hidden;
+    }
+
+    /* Subtle moving background (very light) */
+    .bgGlow{
+      position:fixed; inset:-40vh -30vw auto -30vw;
+      height:80vh;
+      background:
+        radial-gradient(closest-side, rgba(0,0,0,.06), rgba(0,0,0,0)),
+        radial-gradient(closest-side, rgba(0,0,0,.04), rgba(0,0,0,0));
+      filter: blur(22px);
+      opacity:.55;
+      pointer-events:none;
+      transform: translate3d(0,0,0);
+      animation: floatGlow 10s var(--ease) infinite alternate;
+    }
+    @keyframes floatGlow{
+      0%{ transform: translate3d(-2%, -2%, 0) }
+      100%{ transform: translate3d(2%, 2%, 0) }
+    }
+
+    .wrap{
+      max-width:860px;
+      margin:0 auto;
+      padding:24px var(--pad) 118px;
+      position:relative;
+    }
+
+    /* Header */
+    .header{
+      margin-bottom: 10px;
+      animation: fadeUp .55s var(--ease) both;
+    }
+
+    /* Handwritten title font stack (iOS friendly) */
+    .title{
+      margin:0;
+      font-size:26px;
+      line-height:1.05;
+      letter-spacing:-0.01em;
+      font-weight:700;
+      font-family:
+        "Snell Roundhand","Bradley Hand","Apple Chancery",
+        "Comic Sans MS", /* last resort */
+        cursive;
+    }
+
+    /* Make the rest feel crisp & “tool-like” */
+    .sub{
+      margin-top:10px;
+      font-size:15px;
+      color:var(--muted);
+      line-height:1.55;
+      letter-spacing:-0.01em;
+      font-weight:520;
+      animation: fadeUp .55s var(--ease) .06s both;
+    }
+
+    /* Home grid */
+    .homeGrid{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:16px;
+    }
+    /* Make the last card centered if odd count */
+    .homeGrid .stateBtn:last-child{
+      grid-column: 1 / -1;
+      max-width: 420px;
+      justify-self:center;
+      width: 100%;
+    }
+
+    .stateBtn{
+      border:1px solid rgba(255,255,255,.55);
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:18px 14px 16px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      transform: translateY(14px);
+      opacity:0;
+      animation: popIn .55s var(--ease) both;
+      transition: transform .18s var(--ease), box-shadow .18s var(--ease), filter .18s var(--ease), opacity .18s var(--ease);
+      will-change: transform;
+    }
+    .stateBtn:nth-child(1){ animation-delay:.06s }
+    .stateBtn:nth-child(2){ animation-delay:.10s }
+    .stateBtn:nth-child(3){ animation-delay:.14s }
+    .stateBtn:nth-child(4){ animation-delay:.18s }
+    .stateBtn:nth-child(5){ animation-delay:.22s }
+
+    @keyframes popIn{
+      0%{ transform: translateY(14px); opacity:0 }
+      100%{ transform: translateY(0); opacity:1 }
+    }
+    @keyframes fadeUp{
+      0%{ transform: translateY(10px); opacity:0 }
+      100%{ transform: translateY(0); opacity:1 }
+    }
+
+    /* Press feels like iOS: lift, not shrink */
+    .stateBtn:active{
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(0,0,0,.12);
+      filter: saturate(1.05);
+    }
+
+    .iconCircle{
+      width:58px; height:58px; border-radius:999px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:26px;
+      background: rgba(0,0,0,.04);
+      border: 1px solid rgba(0,0,0,.04);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+      position:relative;
+      overflow:hidden;
+    }
+    /* Tiny shine sweep on icons (subtle) */
+    .iconCircle::after{
+      content:"";
+      position:absolute; inset:-40% -60%;
+      background: linear-gradient(120deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0));
+      transform: translateX(-40%) rotate(8deg);
+      opacity:.35;
+      animation: sweep 3.8s var(--ease) infinite;
+    }
+    @keyframes sweep{
+      0%,55%{ transform: translateX(-55%) rotate(8deg); opacity:0 }
+      70%{ opacity:.32 }
+      100%{ transform: translateX(45%) rotate(8deg); opacity:0 }
+    }
+
+    /* Card text font: softer but still modern */
+    .stateText{
+      font-size:14.5px;
+      font-weight:650;
+      letter-spacing:-0.01em;
+      color: rgba(0,0,0,.86);
+      font-family:
+        -apple-system,BlinkMacSystemFont,
+        "SF Pro Display","SF Pro Text",
+        "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+        "Segoe UI",Roboto,Arial,sans-serif;
+    }
+
+    .hint{
+      margin-top:14px;
+      font-size:12px;
+      color: rgba(0,0,0,.40);
+      line-height:1.45;
+      animation: fadeUp .55s var(--ease) .14s both;
+    }
+
+    /* Result */
+    .navRow{
+      display:flex;
+      gap:10px;
+      margin: 4px 0 12px;
+      animation: fadeUp .45s var(--ease) both;
+    }
+    .pill{
+      border:1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.75);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border-radius:999px;
+      padding:10px 12px;
+      font-size:13px;
+      font-weight:700;
+      color: rgba(0,0,0,.75);
+      transition: transform .12s var(--ease);
+    }
+    .pill:active{ transform: translateY(-1px); }
+
+    .card{
+      border: 1px solid rgba(255,255,255,.55);
+      background: var(--card);
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      transform-origin: 50% 10%;
+      animation: cardIn .55s var(--ease) both;
+    }
+    @keyframes cardIn{
+      0%{ transform: translateY(14px) scale(.99); opacity:0 }
+      100%{ transform: translateY(0) scale(1); opacity:1 }
+    }
+
+    .accent{
+      height:10px; border-radius:999px;
+      background: linear-gradient(90deg, rgba(0,0,0,.15), rgba(0,0,0,0));
+      margin-bottom: 14px;
+      position:relative;
+      overflow:hidden;
+    }
+    /* Accent shimmer */
+    .accent::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0));
+      transform: translateX(-60%);
+      opacity:.22;
+      animation: accentSweep 2.6s var(--ease) infinite;
+    }
+    @keyframes accentSweep{
+      0%,55%{ transform: translateX(-65%); opacity:0 }
+      75%{ opacity:.22 }
+      100%{ transform: translateX(65%); opacity:0 }
+    }
+
+    .stateTitle{
+      font-size:22px;
+      font-weight:850;
+      letter-spacing:-0.02em;
+      margin: 4px 0 10px;
+    }
+
+    .decide{
+      white-space: pre-line;
+      font-size: 17px;
+      line-height: 1.7;
+      letter-spacing: -0.01em;
+      color: rgba(0,0,0,.86);
+    }
+
+    .divider{
+      height:1px;
+      background: rgba(0,0,0,.08);
+      margin: 16px 0;
+    }
+
+    .label{
+      font-size: 12px;
+      color: rgba(0,0,0,.50);
+      font-weight: 850;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .pick{
+      margin-top: 10px;
+      font-size: 22px;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      animation: fadeUp .35s var(--ease) both;
+    }
+
+    .meta{
+      margin-top: 8px;
+      font-size: 13px;
+      color: rgba(0,0,0,.55);
+      line-height: 1.5;
+      animation: fadeUp .35s var(--ease) .04s both;
+    }
+
+    .module{
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.04);
+      border: 1px solid rgba(0,0,0,.05);
+      animation: fadeUp .35s var(--ease) .06s both;
+    }
+    .moduleTitle{
+      font-size: 12px;
+      color: rgba(0,0,0,.50);
+      font-weight: 850;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .moduleBody{
+      margin-top: 8px;
+      font-size: 14px;
+      color: rgba(0,0,0,.82);
+      line-height: 1.55;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+    }
+
+    /* Sticky action bar */
+    .sticky{
+      position:fixed; left:0; right:0; bottom:0;
+      padding: 10px 12px 12px;
+      border-top:1px solid rgba(0,0,0,.08);
+      background: rgba(245,245,247,.78);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+    }
+    .stickyInner{
+      max-width:860px;
+      margin:0 auto;
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      padding: 0 var(--pad);
+    }
+
+    .action{
+      border-radius: 999px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 850;
+      border: 1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.85);
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      transition: transform .12s var(--ease), box-shadow .12s var(--ease);
+    }
+    .action:active{
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(0,0,0,.10);
+    }
+    .action.primary{
+      border-color: rgba(0,0,0,.88);
+      background: rgba(0,0,0,.92);
+      color:#fff;
+      box-shadow: 0 10px 26px rgba(0,0,0,.20);
+    }
+    .action.ghost{
+      background: rgba(255,255,255,.72);
+      color: rgba(0,0,0,.78);
+    }
+
+    /* Selection focus effect: when choosing a state, others fade slightly */
+    .dimmed{ opacity:.60; }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .bgGlow, .iconCircle::after, .accent::after { animation: none !important; }
+      .stateBtn, .header, .sub, .hint, .card, .pick, .meta, .module, .navRow { animation: none !important; opacity:1 !important; transform:none !important; }
+      .stateBtn:active, .pill:active, .action:active { transform:none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bgGlow"></div>
+
+  <div class="wrap">
+    <!-- HOME -->
+    <section id="home">
+      <div class="header">
+        <h1 class="title">说你的 feel，选你的饭</h1>
+        <div class="sub">不用想。我替你做一个不后悔的决定。</div>
+      </div>
+
+      <div class="homeGrid">
+        <button class="stateBtn" data-state="tired">
+          <div class="iconCircle">😮‍💨</div>
+          <div class="stateText">累</div>
+        </button>
+
+        <button class="stateBtn" data-state="sad">
+          <div class="iconCircle">☹️</div>
+          <div class="stateText">心情不好</div>
+        </button>
+
+        <button class="stateBtn" data-state="reward">
+          <div class="iconCircle">😌</div>
+          <div class="stateText">想奖励自己</div>
+        </button>
+
+        <button class="stateBtn" data-state="rush">
+          <div class="iconCircle">🕙</div>
+          <div class="stateText">赶时间</div>
+        </button>
+
+        <button class="stateBtn" data-state="decide">
+          <div class="iconCircle">🤔</div>
+          <div class="stateText">你来决定</div>
+        </button>
+      </div>
+
+      <div class="hint">V1：先把“决定”和“可信度”做对；聪明和个性化留到后期。</div>
+    </section>
+
+    <!-- RESULT -->
+    <section id="result" style="display:none;">
+      <div class="navRow">
+        <button class="pill" id="homeBtn">← 回首页</button>
+      </div>
+
+      <div class="card" id="resultCard">
+        <div class="accent" id="accentBar"></div>
+
+        <div class="stateTitle" id="stateTitle"></div>
+        <div class="decide" id="decideText"></div>
+
+        <div class="divider"></div>
+
+        <div class="label">今天就点这个</div>
+        <div class="pick" id="pickText"></div>
+        <div class="meta" id="pickMeta"></div>
+
+        <div class="module">
+          <div class="moduleTitle" id="moduleTitle"></div>
+          <div class="moduleBody" id="moduleBody"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Sticky action bar -->
+  <div class="sticky" id="stickyBar" style="display:none;">
+    <div class="stickyInner">
+      <button class="action primary" id="goBtn">去点外卖</button>
+      <button class="action" id="swapBtn">换一个</button>
+      <button class="action ghost" id="againBtn">换个状态</button>
+    </div>
+  </div>
+
+<script>
+  const DATA = {
+    tired: {
+      title: "😮‍💨 累",
+      accent: "linear-gradient(90deg, rgba(0,0,0,.18), rgba(0,0,0,0))",
+      decide: "现在这种情况，\n直接吃一份热的、有蛋白的主食。\n\n不刺激，能恢复体力，\n吃完状态会慢慢回来。",
+      moduleTitle: "补能搭配",
+      moduleBody: "从「卤蛋 / 煎蛋 / 小菜」里随便选一个就行。别追求完美，先恢复。",
+      picks: [
+        { dish:"清汤牛肉面 + 煎鸡蛋 + 小菜", why:"热 + 蛋白明确 + 清淡，恢复感最强。", kw:"清汤牛肉面 煎蛋 小菜" },
+        { dish:"牛肉粉丝汤 + 卤鸡蛋 + 小菜", why:"更软、更好入口，几乎不踩雷。", kw:"牛肉粉丝汤 卤鸡蛋 小菜" },
+        { dish:"皮蛋粥 + 油条 + 小菜", why:"极度疲惫兜底：消化压力最低。", kw:"皮蛋瘦肉粥 油条 小菜" },
+      ]
+    },
+    sad: {
+      title: "☹️ 心情不好",
+      accent: "linear-gradient(90deg, rgba(0,0,0,.20), rgba(0,0,0,0))",
+      decide: "现在这种情况，\n来一份熟悉、能顶住的饭。\n\n它会把情绪慢慢拉回正常状态。",
+      moduleTitle: "情绪稳住法",
+      moduleBody: "先吃两口再决定要不要喝汽水。目标不是爽，是把情绪拉回“正常线”。",
+      picks: [
+        { dish:"麻婆豆腐盖饭 + 可乐", why:"熟悉 + 轻重口，先止血，再回到正常。", kw:"麻婆豆腐 盖饭" },
+        { dish:"炸酱面 + 雪碧", why:"强“熟悉感”路径：稳定、可预期。", kw:"炸酱面" },
+        { dish:"新疆抓饭 + 可乐", why:"饱腹感最稳，情绪波动时更“顶得住”。", kw:"新疆抓饭" },
+      ]
+    },
+    reward: {
+      title: "😌 想奖励自己",
+      accent: "linear-gradient(90deg, rgba(0,0,0,.16), rgba(0,0,0,0))",
+      decide: "现在这种情况，\n点一份最“值得”的东西。\n\n这是你主动选择的一顿。",
+      moduleTitle: "仪式感（可选）",
+      moduleBody: "别边走边吃：坐下、打开一首喜欢的歌，把这一顿吃完。",
+      picks: [
+        { dish:"牛肉芝士汉堡 + 鸡腿 + 可乐", why:"强满足感：吃完会说“爽了”。", kw:"牛肉 芝士 汉堡 鸡腿" },
+        { dish:"过油肉拌面 + 煎蛋 + 可乐", why:"重口 + 质感：更像“奖励”。", kw:"过油肉 拌面 煎蛋" },
+        { dish:"披萨 / 寿司（二选一）", why:"披萨=庆祝型；寿司=品质型（看你当下想要哪种“值”）。", kw:"披萨 寿司" },
+      ]
+    },
+    rush: {
+      title: "🕙 赶时间",
+      accent: "linear-gradient(90deg, rgba(0,0,0,.24), rgba(0,0,0,0))",
+      decide: "现在最重要的是快和确定。\n\n把这顿饭当作清掉一件待办。",
+      moduleTitle: "最短路径",
+      moduleBody: "打开外卖后，优先选「预计送达最短」的那家，不要赌网红爆款。",
+      picks: [
+        { dish:"Subway 香烤牛肉三明治 + 雪碧", why:"不进厨房路径：时间最可控。", kw:"Subway 香烤牛肉 三明治" },
+        { dish:"鸡肉卷 + 可乐", why:"手持 + 打包快：行动不中断。", kw:"鸡肉卷" },
+        { dish:"青椒鸡蛋盖饭", why:"厨房模板：出餐稳定，最少变量。", kw:"青椒鸡蛋 盖饭" },
+      ]
+    },
+    decide: {
+      title: "🤔 你来决定",
+      accent: "linear-gradient(90deg, rgba(0,0,0,.14), rgba(0,0,0,0))",
+      decide: "现在这种情况，\n来份清淡但完整的一餐。\n\n不偏，不刺激，\n也不会让事情变得更糟。",
+      moduleTitle: "我为什么这么选",
+      moduleBody: "按时间段走“后悔率最低”的那条路：白天偏效率，下午晚上偏恢复，深夜偏稳情绪。"
+    }
+  };
+
+  function timeBucket(){
+    const h = new Date().getHours();
+    if (h >= 7 && h < 14) return "rush";
+    if (h >= 14 && h < 21) return "tired";
+    return "sad";
+  }
+
+  function picksFor(stateKey){
+    if(stateKey !== "decide") return DATA[stateKey].picks;
+    const bucket = timeBucket();
+    const b = DATA[bucket].picks;
+    return [
+      { dish: b[0].dish, why: `按当前时间：走「${DATA[bucket].title}」公式（最不容易后悔）。`, kw: b[0].kw },
+      { dish: DATA.tired.picks[1].dish, why: "偏恢复：更稳、更容易吃下去。", kw: DATA.tired.picks[1].kw },
+      { dish: DATA.rush.picks[0].dish, why: "偏效率：最快拿到、最少变量。", kw: DATA.rush.picks[0].kw },
+    ];
+  }
+
+  const homeEl = document.getElementById('home');
+  const resEl  = document.getElementById('result');
+  const stickyBar = document.getElementById('stickyBar');
+
+  const accentBar  = document.getElementById('accentBar');
+  const stateTitle = document.getElementById('stateTitle');
+  const decideText = document.getElementById('decideText');
+  const pickText   = document.getElementById('pickText');
+  const pickMeta   = document.getElementById('pickMeta');
+
+  const moduleTitle = document.getElementById('moduleTitle');
+  const moduleBody  = document.getElementById('moduleBody');
+
+  const homeBtn = document.getElementById('homeBtn');
+  const goBtn   = document.getElementById('goBtn');
+  const swapBtn = document.getElementById('swapBtn');
+  const againBtn= document.getElementById('againBtn');
+
+  let currentState = null;
+  let idx = 0;
+
+  function showHome(){
+    resEl.style.display  = "none";
+    stickyBar.style.display = "none";
+    homeEl.style.display = "block";
+    currentState = null;
+    idx = 0;
+
+    // reset any dimming
+    document.querySelectorAll('.stateBtn').forEach(b => b.classList.remove('dimmed'));
+  }
+
+  function animateSwap(){
+    // small “soft” transition on pick change
+    pickText.style.opacity = 0;
+    pickMeta.style.opacity = 0;
+    setTimeout(()=>{
+      pickText.style.opacity = 1;
+      pickMeta.style.opacity = 1;
+    }, 90);
+  }
+
+  function render(stateKey, chosenBtn){
+    currentState = stateKey;
+    idx = 0;
+
+    const S = DATA[stateKey];
+    const picks = picksFor(stateKey);
+
+    // dim others a bit right when you choose (feels “alive”)
+    document.querySelectorAll('.stateBtn').forEach(b=>{
+      if(chosenBtn && b !== chosenBtn) b.classList.add('dimmed');
+    });
+
+    accentBar.style.background = S.accent || "linear-gradient(90deg, rgba(0,0,0,.14), rgba(0,0,0,0))";
+    stateTitle.textContent = S.title;
+    decideText.textContent = S.decide;
+
+    pickText.textContent = picks[idx].dish;
+    pickMeta.textContent = picks[idx].why;
+
+    moduleTitle.textContent = S.moduleTitle || "";
+    moduleBody.textContent  = S.moduleBody || "";
+
+    homeEl.style.display = "none";
+    resEl.style.display  = "block";
+    stickyBar.style.display = "block";
+    animateSwap();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  function swap(){
+    const picks = picksFor(currentState);
+    idx = (idx + 1) % picks.length;
+    pickText.textContent = picks[idx].dish;
+    pickMeta.textContent = picks[idx].why;
+    animateSwap();
+  }
+
+  // ✅ 保留“尝试唤醒美团 App + 失败回退网页搜索”
+  function go(){
+    const picks = picksFor(currentState);
+    const kw = picks[idx].kw || picks[idx].dish;
+
+    const appUrl = "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
+    const webUrl = "https://waimai.meituan.com/search?keyword=" + encodeURIComponent(kw);
+
+    const start = Date.now();
+    window.location.href = appUrl;
+
+    setTimeout(() => {
+      if (Date.now() - start < 1400) {
+        window.open(webUrl, "_blank");
+      }
+    }, 900);
+  }
+
+  document.querySelectorAll('.stateBtn').forEach(b=>{
+    b.addEventListener('click', ()=>render(b.dataset.state, b));
+  });
+
+  homeBtn.addEventListener('click', showHome);
+  againBtn.addEventListener('click', showHome);
+  swapBtn.addEventListener('click', swap);
+  goBtn.addEventListener('click', go);
+</script>
+</body>
+</html>
