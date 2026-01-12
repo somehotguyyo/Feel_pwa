@@ -460,7 +460,9 @@
    - kw：跳美团搜索关键词（尽量短、命中高；括号内容会被去掉）
    - cat：类别（noodle/rice/soft/fast/heavy/sweet）
    ========================= */
-
+let currentMood = null;
+let currentDish = null;
+let lastDishId = null;
 function toKW(label){
   // 去掉括号内容、去掉“+”、去掉多余空格；保留核心关键词
   return label
@@ -643,7 +645,9 @@ function pickByMood(moodKey, lastId){
 
   let currentState = null;
   let idx = 0;
-
+let currentMood = null;
+let currentDish = null;
+let lastDishId = null;
   function showHome(){
     resEl.style.display  = "none";
     stickyBar.style.display = "none";
@@ -666,11 +670,13 @@ function pickByMood(moodKey, lastId){
   }
 
   function render(stateKey, chosenBtn){
-    currentState = stateKey;
+    currentMood = stateKey;
+currentDish = pickByMood(currentMood, lastDishId);
+lastDishId = currentDish?.id || null;
     idx = 0;
 
     const S = DATA[stateKey];
-    const picks = picksFor(stateKey);
+    const pick = { dish: currentDish?.label || "", why: "" };
 
     // dim others a bit right when you choose (feels “alive”)
     document.querySelectorAll('.stateBtn').forEach(b=>{
