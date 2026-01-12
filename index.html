@@ -643,18 +643,26 @@
     }
 
     function goWaimai(){
-      const kw = (currentDish?.kw || currentDish?.label || "").trim();
-      if(!kw){
-        showToast("先选一个再去点外卖🙂");
-        return;
-      }
-      jumpedOut = true;
+  const kw = (currentDish?.kw || currentDish?.label || "").trim();
+  if(!kw){
+    showToast("先选一个再去点外卖🙂");
+    return;
+  }
 
-      // iOS / PWA：优先用 https（更稳），再尝试 scheme（部分机型会拦）
-      // 你之前已经能跳到美团搜索，这里保持“稳”的方式
-      const url = `https://waimai.meituan.com/search?keyword=${encodeURIComponent(kw)}`;
-      window.location.href = url;
-    }
+  jumpedOut = true;
+
+  // ✅ 优先唤醒美团外卖 App（不走网页）
+  const appUrl = "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
+
+  // 给用户一个即时反馈
+  showToast("正在打开美团…");
+
+  // 尝试唤醒 App
+  window.location.href = appUrl;
+
+  // ⚠️ 不做网页兜底（按你要求）
+  // 如果你之后又想要“唤醒失败就去网页”，我再给你加一个可开关的 fallback
+}
 
     // 从外卖回来，弹一句
     document.addEventListener("visibilitychange", ()=>{
