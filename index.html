@@ -83,7 +83,6 @@
       font-size:34px;
       letter-spacing:-.02em;
       line-height:1.08;
-      /* 你想要更“手写感”，但又不幼稚： */
       font-family:"Snell Roundhand","Bradley Hand","Segoe Script",-apple-system,"PingFang SC",sans-serif;
     }
     .subtitle{
@@ -144,7 +143,7 @@
       padding: 10px 0 18px;
     }
 
-    /* RESULT 页面布局：你圈的那块要往下 + 居中，并且不要离底部按钮太远 */
+    /* RESULT 页面：按你要求“更往下 + 居中 + 距离按钮更近” */
     .result{
       height:100%;
       display:none;
@@ -162,10 +161,11 @@
       align-items:center;
       justify-content:flex-start;
 
-      /* ✅ 关键：你圈出来那块整体往下 */
-      padding-top: 54px; /* 原来太靠上，你要“往下”就是加这个 */
-      /* ✅ 底部留给按钮的空间变小，让按钮靠近卡片 */
-      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+      /* ✅ 你圈出来那块：再往下 */
+      padding-top: 94px;
+
+      /* ✅ 给底部按钮留空间，但不要太大（让按钮更贴近卡片） */
+      padding-bottom: calc(140px + env(safe-area-inset-bottom));
     }
 
     .card{
@@ -238,12 +238,12 @@
     }
     .ritual b{display:block; margin-bottom:6px;}
 
-    /* 底部按钮：固定靠下，但距离卡片不要太远 */
+    /* ✅ 三按钮：整体上移（更顺手） */
     .actions{
       position:fixed;
       left:50%;
       transform:translateX(-50%);
-      bottom: calc(18px + env(safe-area-inset-bottom)); /* ✅ 更贴近底部 */
+      bottom: calc(86px + env(safe-area-inset-bottom));
       width:min(860px, calc(100% - 24px));
       display:none;
       z-index:25;
@@ -290,7 +290,7 @@
       position:fixed;
       left:50%;
       transform:translateX(-50%);
-      bottom: calc(86px + env(safe-area-inset-bottom)); /* ✅ 离按钮更近一点 */
+      bottom: calc(140px + env(safe-area-inset-bottom));
       background:rgba(17,17,17,.92);
       color:#fff;
       padding:10px 14px;
@@ -314,25 +314,20 @@
 </head>
 
 <body>
-
-  <!-- 左上返回 -->
   <div class="topLeft" id="topLeft">
     <div class="backPill" id="backBtn">← 回首页</div>
   </div>
 
-  <!-- HOME -->
   <section class="home" id="home">
     <div class="hero">
       <h1 class="title">说你的 feel，选你的饭</h1>
-      <p class="subtitle">不用想,我替你做一个决定。</p>
+      <p class="subtitle">不用想,我替你做一个决定</p>
     </div>
 
     <div class="grid" id="grid"></div>
-
     <div class="foot">V1：先把“决定”和“可信度”做对；聪明和个性化放到后期。</div>
   </section>
 
-  <!-- RESULT -->
   <section class="result" id="result">
     <div class="resultInner">
       <div class="card">
@@ -348,13 +343,12 @@
 
         <div class="ritual" id="ritualBox">
           <b>仪式感（可选）</b>
-          打开一首喜欢的歌，把这一顿吃完。
+          坐下，打开一首喜欢的歌，把这一顿吃完。
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 底部按钮 -->
   <div class="actions" id="actions">
     <div class="actionsRow">
       <div class="btn primary wide" id="goBtn">去点外卖</div>
@@ -367,7 +361,7 @@
 
   <script>
     /**********************
-     * 文案/状态
+     * 状态文案（保持原意，不乱改）
      **********************/
     const STATE_UI = {
       tired:  { emoji:"😮‍💨", name:"累",
@@ -406,7 +400,7 @@
     ];
 
     /**********************
-     * 菜品（示例 60，后续可加到 200）
+     * 菜品（你后续继续加到 200）
      **********************/
     function toKW(label){
       return label
@@ -417,7 +411,6 @@
     }
 
     const DISHES = [
-      // noodle
       { id:"N01", label:"清汤牛肉面", cat:"noodle" },
       { id:"N02", label:"红烧牛肉面", cat:"noodle" },
       { id:"N03", label:"牛腩面", cat:"noodle" },
@@ -428,68 +421,22 @@
       { id:"N08", label:"葱油拌面", cat:"noodle" },
       { id:"N09", label:"担担面", cat:"noodle" },
       { id:"N10", label:"牛肉粉丝汤", cat:"noodle" },
-      { id:"N11", label:"酸辣粉", cat:"noodle" },
-      { id:"N12", label:"广式炒河粉", cat:"noodle" },
-
-      // rice
-      { id:"R13", label:"番茄炒蛋 + 米饭", cat:"rice" },
-      { id:"R14", label:"青椒鸡蛋 + 米饭", cat:"rice" },
-      { id:"R15", label:"照烧鸡腿 + 米饭", cat:"rice" },
-      { id:"R16", label:"咖喱鸡 + 米饭", cat:"rice" },
-      { id:"R17", label:"黑椒牛柳 + 米饭", cat:"rice" },
-      { id:"R18", label:"红烧牛肉 + 米饭（多肉）", cat:"rice" },
-      { id:"R19", label:"黄焖鸡 + 米饭（偏重口）", cat:"rice" },
-      { id:"R20", label:"新疆抓饭（牛肉）", cat:"rice" },
-      { id:"R21", label:"烤肉拌饭", cat:"rice" },
-      { id:"R22", label:"麻婆豆腐 + 米饭", cat:"rice" },
-
-      // soft
-      { id:"S23", label:"皮蛋瘦肉粥（热的）", cat:"soft" },
-      { id:"S24", label:"小米粥 + 小菜", cat:"soft" },
-      { id:"S25", label:"紫菜蛋花汤 + 米饭", cat:"soft" },
-      { id:"S26", label:"冬瓜排骨汤", cat:"soft" },
-      { id:"S27", label:"番茄牛腩汤", cat:"soft" },
-
-      // fast
-      { id:"F28", label:"经典牛肉汉堡", cat:"fast" },
-      { id:"F29", label:"鸡肉卷", cat:"fast" },
-      { id:"F30", label:"香烤牛肉三明治", cat:"fast" },
-      { id:"F31", label:"披萨（单人份）", cat:"fast" },
-      { id:"F32", label:"炸鸡套餐", cat:"fast" },
-      { id:"F33", label:"饭团/便当（即取）", cat:"fast" },
-
-      // heavy
-      { id:"H34", label:"红烧排骨 + 米饭", cat:"heavy" },
-      { id:"H35", label:"回锅肉 + 米饭", cat:"heavy" },
-      { id:"H36", label:"麻辣香锅", cat:"heavy" },
-      { id:"H37", label:"烧烤拼盘", cat:"heavy" },
-      { id:"H38", label:"炸猪排套餐", cat:"heavy" },
-
-      // sweet
-      { id:"T39", label:"奶茶", cat:"sweet" },
-      { id:"T40", label:"提拉米苏", cat:"sweet" },
-      { id:"T41", label:"冰淇淋", cat:"sweet" },
-
-      // 再补一些避免太少
-      { id:"N42", label:"日式豚骨拉面", cat:"noodle" },
-      { id:"N43", label:"海鲜汤面", cat:"noodle" },
-      { id:"R44", label:"酸甜口肉丝 + 米饭", cat:"rice" },
-      { id:"R45", label:"鸡丁 + 米饭（不辣）", cat:"rice" },
-      { id:"S46", label:"白粥 + 咸菜", cat:"soft" },
-      { id:"S47", label:"南瓜粥", cat:"soft" },
-      { id:"F48", label:"火腿芝士三明治", cat:"fast" },
-      { id:"F49", label:"墨西哥鸡肉卷饼", cat:"fast" },
-      { id:"H50", label:"炸鸡腿（重满足）", cat:"heavy" },
-      { id:"N51", label:"牛肉拌面", cat:"noodle" },
-      { id:"R52", label:"白切鸡 + 米饭（不油不辣）", cat:"rice" },
-      { id:"R53", label:"清蒸鱼 + 米饭", cat:"rice" },
-      { id:"N54", label:"酸菜肉丝面", cat:"noodle" },
-      { id:"R55", label:"豆腐牛肉 + 米饭（微辣）", cat:"rice" },
-      { id:"S56", label:"排骨汤 + 米饭", cat:"soft" },
-      { id:"F57", label:"薯条 + 饮料（应急）", cat:"fast" },
-      { id:"N58", label:"清汤鸡丝面", cat:"noodle" },
-      { id:"R59", label:"鸡丝蔬菜 + 米饭", cat:"rice" },
-      { id:"S60", label:"鸡丝粥", cat:"soft" },
+      { id:"R11", label:"番茄炒蛋 + 米饭", cat:"rice" },
+      { id:"R12", label:"青椒鸡蛋 + 米饭", cat:"rice" },
+      { id:"R13", label:"照烧鸡腿 + 米饭", cat:"rice" },
+      { id:"R14", label:"黑椒牛柳 + 米饭", cat:"rice" },
+      { id:"R15", label:"红烧牛肉 + 米饭（多肉）", cat:"rice" },
+      { id:"R16", label:"麻婆豆腐 + 米饭", cat:"rice" },
+      { id:"R17", label:"新疆抓饭（牛肉）", cat:"rice" },
+      { id:"S18", label:"皮蛋瘦肉粥（热的）", cat:"soft" },
+      { id:"S19", label:"小米粥 + 小菜", cat:"soft" },
+      { id:"S20", label:"排骨汤 + 米饭", cat:"soft" },
+      { id:"F21", label:"经典牛肉汉堡", cat:"fast" },
+      { id:"F22", label:"鸡肉卷", cat:"fast" },
+      { id:"F23", label:"香烤牛肉三明治", cat:"fast" },
+      { id:"H24", label:"麻辣香锅", cat:"heavy" },
+      { id:"T25", label:"奶茶", cat:"sweet" },
+      { id:"T26", label:"提拉米苏", cat:"sweet" },
     ].map(d => ({ ...d, kw: toKW(d.label) }));
 
     const POOLS = {
@@ -617,33 +564,37 @@
     }
 
     /**********************
-     * 二次确认唤醒美团 App（必须）
+     * 唤醒美团（A：二次确认，不改）
+     * ✅ 关键变化：第二次点击“同步双发”，更像你当初那次成功触发
      **********************/
     let needConfirmOpen = false;
     let confirmTimer = null;
-
-    function meituanSchemeURL(kw){
-      return "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
-    }
-
-    function openMeituanNow(kw){
-      const url = meituanSchemeURL(kw);
-
-      // iOS/PWA 更稳：iframe 同步触发 scheme
-      const iframe = document.createElement("iframe");
-      iframe.style.display = "none";
-      iframe.src = url;
-      document.body.appendChild(iframe);
-
-      setTimeout(() => {
-        try { document.body.removeChild(iframe); } catch(e) {}
-      }, 700);
-    }
 
     function resetConfirm(){
       needConfirmOpen = false;
       clearTimeout(confirmTimer);
       goBtn.textContent = "去点外卖";
+    }
+
+    function meituanSchemeURL(kw){
+      // 保持最朴素、最像当初那次的 scheme
+      return "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
+    }
+
+    function openMeituanNOW_SYNC_DOUBLE(kw){
+      const url = meituanSchemeURL(kw);
+
+      // 1) 最原始：同步 location.href（更像你之前成功那次）
+      try { window.location.href = url; } catch(e){}
+
+      // 2) 同步 iframe 再发一次（iOS/PWA 有时只吃这一口）
+      try{
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        setTimeout(()=>{ try{ document.body.removeChild(iframe);}catch(e){} }, 700);
+      }catch(e){}
     }
 
     function goWaimai(){
@@ -653,7 +604,6 @@
         return;
       }
 
-      // 第一次点击：进入确认态（10秒）
       if(!needConfirmOpen){
         needConfirmOpen = true;
         goBtn.textContent = "确认打开美团App";
@@ -672,10 +622,11 @@
       resetConfirm();
       jumpedOut = true;
       showToast("正在打开美团App…");
-      openMeituanNow(kw);
+
+      // ✅ 就在用户手势里同步触发（不 setTimeout / 不异步）
+      openMeituanNOW_SYNC_DOUBLE(kw);
     }
 
-    // 从外卖回来弹一句 + 重置确认态
     document.addEventListener("visibilitychange", ()=>{
       if(document.visibilityState === "visible" && jumpedOut){
         jumpedOut = false;
