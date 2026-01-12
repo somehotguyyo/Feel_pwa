@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="theme-color" content="#f7f7f7" />
+  <meta name="theme-color" content="#f6f6f6" />
 
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
@@ -14,15 +14,14 @@
 
   <style>
     :root{
-      --bg:#f7f7f7;
+      --bg:#f6f6f6;
       --card:rgba(255,255,255,.92);
       --stroke:rgba(0,0,0,.07);
       --text:#111;
       --muted:rgba(0,0,0,.55);
-      --blue:#1d74ff;
       --shadow:0 18px 60px rgba(0,0,0,.10);
-      --shadow2:0 8px 22px rgba(0,0,0,.07);
-      --r:24px;
+      --shadow2:0 10px 26px rgba(0,0,0,.08);
+      --r:28px;
       --ease:cubic-bezier(.2,.9,.2,1);
     }
     *{box-sizing:border-box;}
@@ -33,35 +32,28 @@
       color:var(--text);
       background:
         radial-gradient(900px 520px at 50% -140px, rgba(29,116,255,.16), transparent 60%),
-        radial-gradient(760px 460px at 12% 20%, rgba(255,153,0,.10), transparent 60%),
-        radial-gradient(760px 520px at 88% 18%, rgba(0,0,0,.05), transparent 60%),
+        radial-gradient(760px 460px at 12% 18%, rgba(255,153,0,.10), transparent 60%),
+        radial-gradient(760px 520px at 88% 16%, rgba(0,0,0,.05), transparent 60%),
         var(--bg);
       -webkit-font-smoothing:antialiased;
       overflow:hidden;
     }
 
-    /* 页面容器：全屏 */
-    .screen{
-      height:100%;
-      width:100%;
-      display:flex;
-      flex-direction:column;
-    }
-
-    /* 顶部返回：固定左上 */
+    /* 固定左上返回 */
     .topLeft{
       position:fixed;
       top: calc(12px + env(safe-area-inset-top));
       left: 12px;
-      z-index:20;
+      z-index:30;
+      display:none;
     }
     .backPill{
       border:1px solid var(--stroke);
-      background:rgba(255,255,255,.8);
+      background:rgba(255,255,255,.88);
       border-radius:999px;
       padding:10px 14px;
       box-shadow:var(--shadow2);
-      font-weight:700;
+      font-weight:800;
       color:rgba(0,0,0,.72);
       user-select:none;
       -webkit-tap-highlight-color:transparent;
@@ -69,7 +61,7 @@
     }
     .backPill:active{transform:scale(.98);}
 
-    /* HOME：内容居中 + 往下一点 */
+    /* HOME */
     .home{
       height:100%;
       display:flex;
@@ -82,15 +74,16 @@
     .hero{
       width:min(860px,100%);
       text-align:center;
-      margin-top: 28px;   /* 往下一点 */
+      margin-top: 28px;
       margin-bottom: 18px;
     }
     .title{
       margin:0;
-      font-weight:820;
+      font-weight:860;
       font-size:34px;
       letter-spacing:-.02em;
       line-height:1.08;
+      /* 你想要更“手写感”，但又不幼稚： */
       font-family:"Snell Roundhand","Bradley Hand","Segoe Script",-apple-system,"PingFang SC",sans-serif;
     }
     .subtitle{
@@ -102,11 +95,11 @@
 
     .grid{
       width:min(860px,100%);
-      margin-top: 22px;  /* 选项往下一点 */
+      margin-top: 22px;
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:14px;
-      padding-bottom: 24px;
+      padding-bottom: 16px;
     }
     @media (max-width:390px){ .grid{grid-template-columns:1fr;} }
 
@@ -140,7 +133,7 @@
       flex:0 0 auto;
     }
     .stateText{min-width:0; display:flex; flex-direction:column; gap:4px;}
-    .stateName{font-size:16px;font-weight:760;color:#0b3a8a;letter-spacing:-.01em;}
+    .stateName{font-size:16px;font-weight:780;color:#0b3a8a;letter-spacing:-.01em;}
     .stateHint{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
     .foot{
@@ -148,26 +141,41 @@
       text-align:center;
       font-size:12px;
       color:rgba(0,0,0,.35);
-      padding-bottom: 20px;
+      padding: 10px 0 18px;
     }
 
-    /* RESULT：整体居中 + 往下一点 */
+    /* RESULT 页面布局：你圈的那块要往下 + 居中，并且不要离底部按钮太远 */
     .result{
       height:100%;
       display:none;
-      align-items:center;
-      justify-content:flex-start;
       padding: calc(56px + env(safe-area-inset-top)) 16px 0;
+      overflow:hidden;
     }
-    .result.active{display:flex;}
+    .result.active{display:block;}
 
     .resultInner{
+      height:100%;
       width:min(860px,100%);
+      margin: 0 auto;
       display:flex;
       flex-direction:column;
       align-items:center;
-      margin-top: 52px; /* 结果整体往下一点 */
-      padding-bottom: calc(110px + env(safe-area-inset-bottom));
+      justify-content:flex-start;
+
+      /* ✅ 关键：你圈出来那块整体往下 */
+      padding-top: 54px; /* 原来太靠上，你要“往下”就是加这个 */
+      /* ✅ 底部留给按钮的空间变小，让按钮靠近卡片 */
+      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    }
+
+    .card{
+      width:100%;
+      border:1px solid var(--stroke);
+      background:var(--card);
+      border-radius: var(--r);
+      padding:18px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
       animation:fadeIn .22s var(--ease) both;
     }
     @keyframes fadeIn{
@@ -175,15 +183,6 @@
       to{opacity:1; transform:translateY(0);}
     }
 
-    .card{
-      width:100%;
-      border:1px solid var(--stroke);
-      background:var(--card);
-      border-radius:28px;
-      padding:18px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
     .accentBar{
       height:10px;
       border-radius:999px;
@@ -193,17 +192,16 @@
     .hState{
       margin:0;
       font-size:28px;
-      font-weight:860;
+      font-weight:900;
       letter-spacing:-.02em;
       display:flex;
       align-items:center;
       gap:10px;
-      justify-content:flex-start;
     }
     .hDecide{
       margin:10px 0 0;
       font-size:15px;
-      line-height:1.6;
+      line-height:1.65;
       color:rgba(0,0,0,.70);
       white-space:pre-line;
     }
@@ -211,13 +209,13 @@
     .labelSmall{
       font-size:12px;
       color:rgba(0,0,0,.45);
-      font-weight:800;
+      font-weight:900;
       letter-spacing:.02em;
     }
     .dish{
       margin:8px 0 6px;
       font-size:26px;
-      font-weight:900;
+      font-weight:950;
       letter-spacing:-.02em;
       transition:opacity .14s var(--ease);
     }
@@ -240,28 +238,28 @@
     }
     .ritual b{display:block; margin-bottom:6px;}
 
-    /* 底部按钮：在屏幕中间位置（而不是贴底） */
-    .centerActions{
+    /* 底部按钮：固定靠下，但距离卡片不要太远 */
+    .actions{
       position:fixed;
       left:50%;
       transform:translateX(-50%);
-      bottom: calc(70px + env(safe-area-inset-bottom)); /* 👈 屏幕中间偏下 */
+      bottom: calc(18px + env(safe-area-inset-bottom)); /* ✅ 更贴近底部 */
       width:min(860px, calc(100% - 24px));
       display:none;
-      z-index:15;
+      z-index:25;
     }
-    .centerActions.active{display:block;}
+    .actions.active{display:block;}
 
     .actionsRow{
       display:flex;
       gap:10px;
-      justify-content:center;  /* 👈 3 个按钮在中间 */
+      justify-content:center;
       align-items:center;
     }
     .btn{
       border-radius:999px;
       padding:14px 16px;
-      font-weight:820;
+      font-weight:900;
       border:1px solid var(--stroke);
       background:rgba(255,255,255,.88);
       box-shadow:var(--shadow2);
@@ -271,9 +269,8 @@
       display:flex;
       justify-content:center;
       align-items:center;
-      gap:8px;
-      min-width: 0;
-      transition:transform .15s var(--ease);
+      min-width:0;
+      transition:transform .15s var(--ease), opacity .15s var(--ease);
     }
     .btn:active{transform:scale(.985);}
     .btn.primary{
@@ -293,7 +290,7 @@
       position:fixed;
       left:50%;
       transform:translateX(-50%);
-      bottom: calc(140px + env(safe-area-inset-bottom));
+      bottom: calc(86px + env(safe-area-inset-bottom)); /* ✅ 离按钮更近一点 */
       background:rgba(17,17,17,.92);
       color:#fff;
       padding:10px 14px;
@@ -313,133 +310,90 @@
       opacity:1;
       transform:translateX(-50%) translateY(-6px);
     }
-
-    /* 强提醒弹窗：如果系统拦截唤醒，用“再试一次” */
-    .modalMask{
-      position:fixed; inset:0;
-      background:rgba(0,0,0,.32);
-      display:none;
-      z-index:200;
-      padding: 18px;
-      align-items:center;
-      justify-content:center;
-    }
-    .modalMask.show{display:flex;}
-    .modal{
-      width:min(520px,100%);
-      border-radius:24px;
-      background:rgba(255,255,255,.96);
-      border:1px solid rgba(0,0,0,.08);
-      box-shadow:0 24px 80px rgba(0,0,0,.22);
-      padding:16px;
-    }
-    .modal h3{margin:0; font-size:16px; font-weight:900;}
-    .modal p{margin:8px 0 14px; color:rgba(0,0,0,.62); line-height:1.55; font-size:13.5px;}
-    .modalRow{display:flex; gap:10px;}
   </style>
 </head>
 
 <body>
-  <div class="screen">
 
-    <!-- 返回（只在结果页显示） -->
-    <div class="topLeft" id="topLeft" style="display:none;">
-      <div class="backPill" id="backBtn">← 返回</div>
-    </div>
-
-    <!-- HOME -->
-    <section class="home" id="home">
-      <div class="hero">
-        <h1 class="title">说你的 feel，选你的饭</h1>
-        <p class="subtitle">不用想。我替你做一个不后悔的决定。</p>
-      </div>
-
-      <div class="grid" id="grid"></div>
-
-      <div class="foot">V1：先把“决定”和“可信度”做对；聪明和个性化放到后期。</div>
-    </section>
-
-    <!-- RESULT -->
-    <section class="result" id="result">
-      <div class="resultInner">
-        <div class="card">
-          <div class="accentBar" id="accentBar"></div>
-          <h2 class="hState" id="stateTitle">🙂</h2>
-          <p class="hDecide" id="stateDecide">…</p>
-
-          <div class="divider"></div>
-
-          <div class="labelSmall">今天就点这个</div>
-          <div class="dish" id="dishText">—</div>
-          <p class="dishMeta" id="dishMeta">—</p>
-
-          <div class="ritual" id="ritualBox">
-            <b>仪式感（可选）</b>
-            坐下，打开一首喜欢的歌，把这一顿吃完。
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 中间按钮 -->
-    <div class="centerActions" id="actions">
-      <div class="actionsRow">
-        <div class="btn primary wide" id="goBtn">叫外卖</div>
-        <div class="btn ghost mid" id="swapBtn">换一个</div>
-        <div class="btn mid" id="changeBtn">换心情</div>
-      </div>
-    </div>
-
-    <div class="toast" id="toast">吃饱了就开心啦✨</div>
-
-    <!-- 强提醒弹窗 -->
-    <div class="modalMask" id="modalMask">
-      <div class="modal">
-        <h3>没唤醒美团？</h3>
-        <p>iOS 有时会拦截自动唤醒。点下面这个按钮会再次用「美团 App」方式打开，并带上搜索词。</p>
-        <div class="modalRow">
-          <div class="btn primary wide" id="retryOpen">再试一次（打开美团 App）</div>
-          <div class="btn wide" id="closeModal">先不打开</div>
-        </div>
-      </div>
-    </div>
-
+  <!-- 左上返回 -->
+  <div class="topLeft" id="topLeft">
+    <div class="backPill" id="backBtn">← 回首页</div>
   </div>
+
+  <!-- HOME -->
+  <section class="home" id="home">
+    <div class="hero">
+      <h1 class="title">说你的 feel，选你的饭</h1>
+      <p class="subtitle">不用想,我替你做一个决定。</p>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="foot">V1：先把“决定”和“可信度”做对；聪明和个性化放到后期。</div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="result" id="result">
+    <div class="resultInner">
+      <div class="card">
+        <div class="accentBar" id="accentBar"></div>
+        <h2 class="hState" id="stateTitle">🙂</h2>
+        <p class="hDecide" id="stateDecide">…</p>
+
+        <div class="divider"></div>
+
+        <div class="labelSmall">今天就点这个</div>
+        <div class="dish" id="dishText">—</div>
+        <p class="dishMeta" id="dishMeta">—</p>
+
+        <div class="ritual" id="ritualBox">
+          <b>仪式感（可选）</b>
+          打开一首喜欢的歌，把这一顿吃完。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 底部按钮 -->
+  <div class="actions" id="actions">
+    <div class="actionsRow">
+      <div class="btn primary wide" id="goBtn">去点外卖</div>
+      <div class="btn ghost mid" id="swapBtn">换一个</div>
+      <div class="btn mid" id="changeBtn">换个状态</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">吃饱了就开心啦✨</div>
 
   <script>
     /**********************
-     * 0) 文案（只放 UI 文案）
+     * 文案/状态
      **********************/
     const STATE_UI = {
-      tired:  {
-        emoji:"😮‍💨", name:"累",
-        decide:"现在这种情况，\n来份热的、能顶住的主食。\n先把状态拉回来，再继续战斗。",
+      tired:  { emoji:"😮‍💨", name:"累",
+        decide:"现在这种情况，\n直接吃一份热的、有蛋白的主食。\n让它把你拉回状态。",
         accent:"linear-gradient(90deg, rgba(29,116,255,.30), rgba(0,0,0,.06))",
-        ritual:"把热的端稳：先喝两口汤再开吃。"
+        ritual:"先喝两口热的，再开吃。"
       },
-      sad:    {
-        emoji:"☹️", name:"心情不好",
-        decide:"现在这种情况，\n来一份熟悉的饭和能量。\n情绪触底反弹，从胃里开始。",
+      sad:    { emoji:"☹️", name:"心情不好",
+        decide:"现在这种情况，\n来一份熟悉的饭和能量。\n触底反弹从胃里开始。",
         accent:"linear-gradient(90deg, rgba(255,153,0,.26), rgba(29,116,255,.12))",
         ritual:"五分钟只管吃，别管世界。"
       },
-      reward: {
-        emoji:"😌", name:"想奖励自己",
+      reward: { emoji:"😌", name:"想奖励自己",
         decide:"现在这种情况，\n点一份最“值得”的东西。\n你值得把今天收好。",
         accent:"linear-gradient(90deg, rgba(0,0,0,.10), rgba(255,153,0,.22))",
         ritual:"打开你最爱的歌，把这一顿当成奖杯。"
       },
-      rush:   {
-        emoji:"🕙", name:"赶时间",
+      rush:   { emoji:"🕙", name:"赶时间",
         decide:"现在这种情况，\n选最快、最稳的一餐。\n效率优先，别纠结。",
         accent:"linear-gradient(90deg, rgba(29,116,255,.26), rgba(0,0,0,.08))",
-        ritual:"先下单：吃不吃得精致，先别管。"
+        ritual:"先下单：吃不吃得精致先别管。"
       },
-      decide: {
-        emoji:"🤔", name:"你来决定",
+      decide: { emoji:"🤔", name:"你来决定",
         decide:"现在这种情况，\n来份不偏、不刺激、也不糟糕的一餐。\n稳住就赢。",
         accent:"linear-gradient(90deg, rgba(0,0,0,.06), rgba(29,116,255,.18))",
-        ritual:"给自己一个小承诺：吃完再做下一件事。"
+        ritual:"吃完再做下一件事。"
       }
     };
 
@@ -452,7 +406,7 @@
     ];
 
     /**********************
-     * 1) 菜品（60）+ 抽取引擎（你后续扩到 200 就在这里加）
+     * 菜品（示例 60，后续可加到 200）
      **********************/
     function toKW(label){
       return label
@@ -463,77 +417,79 @@
     }
 
     const DISHES = [
-      // 🍜 noodle 18
+      // noodle
       { id:"N01", label:"清汤牛肉面", cat:"noodle" },
       { id:"N02", label:"红烧牛肉面", cat:"noodle" },
       { id:"N03", label:"牛腩面", cat:"noodle" },
-      { id:"N04", label:"排骨汤面", cat:"noodle" },
-      { id:"N05", label:"鸡汤面", cat:"noodle" },
-      { id:"N06", label:"酸菜肉丝面", cat:"noodle" },
-      { id:"N07", label:"馄饨面", cat:"noodle" },
-      { id:"N08", label:"日式豚骨拉面", cat:"noodle" },
-      { id:"N09", label:"海鲜汤面", cat:"noodle" },
-      { id:"N10", label:"清汤鸡丝面", cat:"noodle" },
-      { id:"N11", label:"炸酱面", cat:"noodle" },
-      { id:"N12", label:"葱油拌面", cat:"noodle" },
-      { id:"N13", label:"过油肉拌面", cat:"noodle" },
-      { id:"N14", label:"担担面", cat:"noodle" },
-      { id:"N15", label:"牛肉拌面", cat:"noodle" },
-      { id:"N16", label:"牛肉粉丝汤", cat:"noodle" },
-      { id:"N17", label:"酸辣粉", cat:"noodle" },
-      { id:"N18", label:"广式炒河粉", cat:"noodle" },
+      { id:"N04", label:"鸡汤面", cat:"noodle" },
+      { id:"N05", label:"排骨汤面", cat:"noodle" },
+      { id:"N06", label:"馄饨面", cat:"noodle" },
+      { id:"N07", label:"炸酱面", cat:"noodle" },
+      { id:"N08", label:"葱油拌面", cat:"noodle" },
+      { id:"N09", label:"担担面", cat:"noodle" },
+      { id:"N10", label:"牛肉粉丝汤", cat:"noodle" },
+      { id:"N11", label:"酸辣粉", cat:"noodle" },
+      { id:"N12", label:"广式炒河粉", cat:"noodle" },
 
-      // 🍚 rice 15
-      { id:"R19", label:"番茄炒蛋 + 米饭", cat:"rice" },
-      { id:"R20", label:"青椒鸡蛋 + 米饭", cat:"rice" },
-      { id:"R21", label:"鸡丝蔬菜 + 米饭", cat:"rice" },
-      { id:"R22", label:"清蒸鱼 + 米饭", cat:"rice" },
-      { id:"R23", label:"白切鸡 + 米饭（不油不辣）", cat:"rice" },
-      { id:"R24", label:"咖喱鸡 + 米饭", cat:"rice" },
-      { id:"R25", label:"黑椒牛柳 + 米饭", cat:"rice" },
-      { id:"R26", label:"红烧牛肉 + 米饭（多肉）", cat:"rice" },
-      { id:"R27", label:"照烧鸡腿 + 米饭", cat:"rice" },
-      { id:"R28", label:"豆腐牛肉 + 米饭（微辣）", cat:"rice" },
-      { id:"R29", label:"酸甜口肉丝 + 米饭", cat:"rice" },
-      { id:"R30", label:"黄焖鸡 + 米饭（偏重口）", cat:"rice" },
-      { id:"R31", label:"新疆抓饭（牛肉）", cat:"rice" },
-      { id:"R32", label:"烤肉拌饭", cat:"rice" },
-      { id:"R33", label:"鸡丁 + 米饭（不辣）", cat:"rice" },
+      // rice
+      { id:"R13", label:"番茄炒蛋 + 米饭", cat:"rice" },
+      { id:"R14", label:"青椒鸡蛋 + 米饭", cat:"rice" },
+      { id:"R15", label:"照烧鸡腿 + 米饭", cat:"rice" },
+      { id:"R16", label:"咖喱鸡 + 米饭", cat:"rice" },
+      { id:"R17", label:"黑椒牛柳 + 米饭", cat:"rice" },
+      { id:"R18", label:"红烧牛肉 + 米饭（多肉）", cat:"rice" },
+      { id:"R19", label:"黄焖鸡 + 米饭（偏重口）", cat:"rice" },
+      { id:"R20", label:"新疆抓饭（牛肉）", cat:"rice" },
+      { id:"R21", label:"烤肉拌饭", cat:"rice" },
+      { id:"R22", label:"麻婆豆腐 + 米饭", cat:"rice" },
 
-      // 🍲 soft 9
-      { id:"S34", label:"皮蛋瘦肉粥（热的）", cat:"soft" },
-      { id:"S35", label:"鸡丝粥", cat:"soft" },
-      { id:"S36", label:"小米粥 + 小菜", cat:"soft" },
-      { id:"S37", label:"白粥 + 咸菜", cat:"soft" },
-      { id:"S38", label:"南瓜粥", cat:"soft" },
-      { id:"S39", label:"排骨汤 + 米饭", cat:"soft" },
-      { id:"S40", label:"番茄牛腩汤", cat:"soft" },
-      { id:"S41", label:"紫菜蛋花汤 + 米饭", cat:"soft" },
-      { id:"S42", label:"冬瓜排骨汤", cat:"soft" },
+      // soft
+      { id:"S23", label:"皮蛋瘦肉粥（热的）", cat:"soft" },
+      { id:"S24", label:"小米粥 + 小菜", cat:"soft" },
+      { id:"S25", label:"紫菜蛋花汤 + 米饭", cat:"soft" },
+      { id:"S26", label:"冬瓜排骨汤", cat:"soft" },
+      { id:"S27", label:"番茄牛腩汤", cat:"soft" },
 
-      // 🍔 fast 9
-      { id:"F43", label:"经典牛肉汉堡", cat:"fast" },
-      { id:"F44", label:"鸡肉卷", cat:"fast" },
-      { id:"F45", label:"火腿芝士三明治", cat:"fast" },
-      { id:"F46", label:"香烤牛肉三明治（热）", cat:"fast" },
-      { id:"F47", label:"墨西哥鸡肉卷饼", cat:"fast" },
-      { id:"F48", label:"披萨（单人份）", cat:"fast" },
-      { id:"F49", label:"炸鸡套餐", cat:"fast" },
-      { id:"F50", label:"薯条 + 饮料（应急）", cat:"fast" },
-      { id:"F51", label:"饭团/便当（即取）", cat:"fast" },
+      // fast
+      { id:"F28", label:"经典牛肉汉堡", cat:"fast" },
+      { id:"F29", label:"鸡肉卷", cat:"fast" },
+      { id:"F30", label:"香烤牛肉三明治", cat:"fast" },
+      { id:"F31", label:"披萨（单人份）", cat:"fast" },
+      { id:"F32", label:"炸鸡套餐", cat:"fast" },
+      { id:"F33", label:"饭团/便当（即取）", cat:"fast" },
 
-      // 🍖 heavy 6
-      { id:"H52", label:"红烧排骨", cat:"heavy" },
-      { id:"H53", label:"回锅肉 + 米饭", cat:"heavy" },
-      { id:"H54", label:"麻辣香锅", cat:"heavy" },
-      { id:"H55", label:"烧烤拼盘", cat:"heavy" },
-      { id:"H56", label:"炸猪排套餐", cat:"heavy" },
-      { id:"H57", label:"炸鸡腿 + 可乐（重满足）", cat:"heavy" },
+      // heavy
+      { id:"H34", label:"红烧排骨 + 米饭", cat:"heavy" },
+      { id:"H35", label:"回锅肉 + 米饭", cat:"heavy" },
+      { id:"H36", label:"麻辣香锅", cat:"heavy" },
+      { id:"H37", label:"烧烤拼盘", cat:"heavy" },
+      { id:"H38", label:"炸猪排套餐", cat:"heavy" },
 
-      // 🍰 sweet 3
-      { id:"T58", label:"奶茶", cat:"sweet" },
-      { id:"T59", label:"提拉米苏", cat:"sweet" },
-      { id:"T60", label:"冰淇淋", cat:"sweet" },
+      // sweet
+      { id:"T39", label:"奶茶", cat:"sweet" },
+      { id:"T40", label:"提拉米苏", cat:"sweet" },
+      { id:"T41", label:"冰淇淋", cat:"sweet" },
+
+      // 再补一些避免太少
+      { id:"N42", label:"日式豚骨拉面", cat:"noodle" },
+      { id:"N43", label:"海鲜汤面", cat:"noodle" },
+      { id:"R44", label:"酸甜口肉丝 + 米饭", cat:"rice" },
+      { id:"R45", label:"鸡丁 + 米饭（不辣）", cat:"rice" },
+      { id:"S46", label:"白粥 + 咸菜", cat:"soft" },
+      { id:"S47", label:"南瓜粥", cat:"soft" },
+      { id:"F48", label:"火腿芝士三明治", cat:"fast" },
+      { id:"F49", label:"墨西哥鸡肉卷饼", cat:"fast" },
+      { id:"H50", label:"炸鸡腿（重满足）", cat:"heavy" },
+      { id:"N51", label:"牛肉拌面", cat:"noodle" },
+      { id:"R52", label:"白切鸡 + 米饭（不油不辣）", cat:"rice" },
+      { id:"R53", label:"清蒸鱼 + 米饭", cat:"rice" },
+      { id:"N54", label:"酸菜肉丝面", cat:"noodle" },
+      { id:"R55", label:"豆腐牛肉 + 米饭（微辣）", cat:"rice" },
+      { id:"S56", label:"排骨汤 + 米饭", cat:"soft" },
+      { id:"F57", label:"薯条 + 饮料（应急）", cat:"fast" },
+      { id:"N58", label:"清汤鸡丝面", cat:"noodle" },
+      { id:"R59", label:"鸡丝蔬菜 + 米饭", cat:"rice" },
+      { id:"S60", label:"鸡丝粥", cat:"soft" },
     ].map(d => ({ ...d, kw: toKW(d.label) }));
 
     const POOLS = {
@@ -546,7 +502,7 @@
     };
 
     const WEIGHTS = {
-      tired:  { noodle: 42, soft: 30, rice: 22, fast: 6,  heavy: 0,  sweet: 0 },
+      tired:  { noodle: 44, soft: 28, rice: 22, fast: 6,  heavy: 0,  sweet: 0 },
       sad:    { rice:   38, noodle: 32, soft: 18, fast: 6,  heavy: 0,  sweet: 6 },
       reward: { heavy:  34, fast:  28, noodle: 18, rice: 12, soft: 0,  sweet: 8 },
       rush:   { fast:   52, rice:  28, noodle: 12, soft: 8,  heavy: 0,  sweet: 0 },
@@ -578,7 +534,7 @@
     }
 
     /**********************
-     * 2) DOM
+     * DOM
      **********************/
     const homeEl = document.getElementById("home");
     const resEl  = document.getElementById("result");
@@ -599,21 +555,17 @@
     const ritualBox = document.getElementById("ritualBox");
 
     const toast = document.getElementById("toast");
-    const modalMask = document.getElementById("modalMask");
-    const retryOpen = document.getElementById("retryOpen");
-    const closeModal = document.getElementById("closeModal");
 
     let currentMood = null;
     let currentDish = null;
     let lastDishId  = null;
     let jumpedOut   = false;
-    let lastKW      = "";
 
     function showToast(msg){
       toast.textContent = msg;
       toast.classList.add("show");
       clearTimeout(showToast._t);
-      showToast._t = setTimeout(()=>toast.classList.remove("show"), 1500);
+      showToast._t = setTimeout(()=>toast.classList.remove("show"), 1400);
     }
 
     function setView(view){
@@ -665,78 +617,81 @@
     }
 
     /**********************
-     * 3) 唤醒美团 App + 搜索
-     * - 第一段：直接 scheme（用户手势触发）
-     * - 第二段：如果系统拦截/没反应，弹窗让用户再点一次（仍然 scheme）
+     * 二次确认唤醒美团 App（必须）
      **********************/
+    let needConfirmOpen = false;
+    let confirmTimer = null;
+
     function meituanSchemeURL(kw){
-      // 你可以改 query 参数名；这版是“最大概率”写法
       return "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
     }
 
-    function openMeituanAppWithKW(kw){
-      lastKW = kw;
+    function openMeituanNow(kw){
+      const url = meituanSchemeURL(kw);
+
+      // iOS/PWA 更稳：iframe 同步触发 scheme
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = url;
+      document.body.appendChild(iframe);
+
+      setTimeout(() => {
+        try { document.body.removeChild(iframe); } catch(e) {}
+      }, 700);
+    }
+
+    function resetConfirm(){
+      needConfirmOpen = false;
+      clearTimeout(confirmTimer);
+      goBtn.textContent = "去点外卖";
+    }
+
+    function goWaimai(){
+      const kw = (currentDish?.kw || currentDish?.label || "").trim();
+      if(!kw){
+        showToast("先选一个再去点外卖🙂");
+        return;
+      }
+
+      // 第一次点击：进入确认态（10秒）
+      if(!needConfirmOpen){
+        needConfirmOpen = true;
+        goBtn.textContent = "确认打开美团App";
+        showToast("再点一次，确认打开美团App");
+
+        clearTimeout(confirmTimer);
+        confirmTimer = setTimeout(()=>{
+          resetConfirm();
+          showToast("已取消确认");
+        }, 10000);
+
+        return;
+      }
+
+      // 第二次点击：真正唤醒
+      resetConfirm();
       jumpedOut = true;
-
-      // 关键：必须由用户点击触发（我们就在按钮点击里调用）
-      const appUrl = meituanSchemeURL(kw);
-
-      // 尝试唤醒
-      window.location.href = appUrl;
-
-      // 如果 900ms 仍然没离开页面，说明可能被拦截 → 弹窗“再试一次”
-      setTimeout(()=>{
-        // 只有在页面仍然可见时才弹（避免已经切走还弹）
-        if(document.visibilityState === "visible"){
-          modalMask.classList.add("show");
-        }
-      }, 900);
+      showToast("正在打开美团App…");
+      openMeituanNow(kw);
     }
 
-    function openMeituanApp(kw){
-  const url = "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
-
-  // iOS/PWA 更稳的方式：iframe 触发 scheme
-  const iframe = document.createElement("iframe");
-  iframe.style.display = "none";
-  iframe.src = url;
-  document.body.appendChild(iframe);
-
-  // 迅速清理
-  setTimeout(() => {
-    try { document.body.removeChild(iframe); } catch(e) {}
-  }, 800);
-}
-
-function goWaimai(){
-  const kw = (currentDish?.kw || currentDish?.label || "").trim();
-  if(!kw){
-    showToast("先选一个再叫外卖🙂");
-    return;
-  }
-
-  jumpedOut = true;
-
-  // ✅ 必须在“点击当下”同步触发
-  openMeituanApp(kw);
-
-  // 如果 1 秒后还没切走（仍可见），说明被拦了：给出明确提示
-  setTimeout(() => {
-    if (document.visibilityState === "visible") {
-      showToast("iOS 这次没放行，再点一次「叫外卖」");
-    }
-  }, 1000);
-}
+    // 从外卖回来弹一句 + 重置确认态
+    document.addEventListener("visibilitychange", ()=>{
+      if(document.visibilityState === "visible" && jumpedOut){
+        jumpedOut = false;
+        resetConfirm();
+        showToast(Math.random() < 0.5 ? "多吃点🙂" : "吃饱了就开心啦✨");
+      }
+    });
 
     /**********************
-     * 4) 绑定
+     * 绑定
      **********************/
-    backBtn.addEventListener("click", ()=> setView("home"));
-    changeBtn.addEventListener("click", ()=> setView("home"));
+    backBtn.addEventListener("click", ()=> { resetConfirm(); setView("home"); });
+    changeBtn.addEventListener("click", ()=> { resetConfirm(); setView("home"); });
     swapBtn.addEventListener("click", swapDish);
     goBtn.addEventListener("click", goWaimai);
 
-    // 首页按钮生成
     function buildHome(){
       gridEl.innerHTML = "";
       HOME_BTNS.forEach(({key, hint})=>{
@@ -757,16 +712,6 @@ function goWaimai(){
 
     buildHome();
     setView("home");
-
-    /**********************
-     * (可选) Service Worker
-     * 如果你更新老是卡缓存：先注释掉下面这段再部署
-     **********************/
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.getRegistrations().then(()=> {
-        navigator.serviceWorker.register("sw.js").catch(()=>{});
-      });
-    }
   </script>
 </body>
 </html>
