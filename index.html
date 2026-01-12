@@ -7,7 +7,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="theme-color" content="#f7f7f7" />
 
-  <!-- 你仓库里如果已有 manifest.json / icons，请保留这两行；没有也不影响网页运行 -->
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
@@ -15,421 +14,436 @@
 
   <style>
     :root{
-      --bg: #f7f7f7;
-      --card: rgba(255,255,255,.86);
-      --card2: rgba(255,255,255,.96);
-      --stroke: rgba(0,0,0,.06);
-      --text: #111;
-      --muted: rgba(0,0,0,.55);
-      --blue: #1d74ff;
-      --shadow: 0 18px 50px rgba(0,0,0,.08);
-      --shadow2: 0 6px 18px rgba(0,0,0,.06);
-      --r: 22px;
-      --pad: 18px;
-      --ease: cubic-bezier(.2,.9,.2,1);
+      --bg:#f7f7f7;
+      --card:rgba(255,255,255,.92);
+      --stroke:rgba(0,0,0,.07);
+      --text:#111;
+      --muted:rgba(0,0,0,.55);
+      --blue:#1d74ff;
+      --shadow:0 18px 60px rgba(0,0,0,.10);
+      --shadow2:0 8px 22px rgba(0,0,0,.07);
+      --r:24px;
+      --ease:cubic-bezier(.2,.9,.2,1);
     }
-
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    *{box-sizing:border-box;}
+    html,body{height:100%;}
     body{
       margin:0;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
       color:var(--text);
       background:
-        radial-gradient(900px 500px at 50% -120px, rgba(29,116,255,.16), transparent 60%),
-        radial-gradient(700px 380px at 12% 20%, rgba(255,153,0,.10), transparent 60%),
-        radial-gradient(700px 420px at 88% 26%, rgba(0,0,0,.05), transparent 60%),
+        radial-gradient(900px 520px at 50% -140px, rgba(29,116,255,.16), transparent 60%),
+        radial-gradient(760px 460px at 12% 20%, rgba(255,153,0,.10), transparent 60%),
+        radial-gradient(760px 520px at 88% 18%, rgba(0,0,0,.05), transparent 60%),
         var(--bg);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-      overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+      overflow:hidden;
     }
 
-    .wrap{
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 22px 16px 120px;
+    /* 页面容器：全屏 */
+    .screen{
+      height:100%;
+      width:100%;
+      display:flex;
+      flex-direction:column;
     }
 
-    /* 顶部：居中 */
+    /* 顶部返回：固定左上 */
+    .topLeft{
+      position:fixed;
+      top: calc(12px + env(safe-area-inset-top));
+      left: 12px;
+      z-index:20;
+    }
+    .backPill{
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.8);
+      border-radius:999px;
+      padding:10px 14px;
+      box-shadow:var(--shadow2);
+      font-weight:700;
+      color:rgba(0,0,0,.72);
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      cursor:pointer;
+    }
+    .backPill:active{transform:scale(.98);}
+
+    /* HOME：内容居中 + 往下一点 */
+    .home{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      padding: calc(56px + env(safe-area-inset-top)) 16px 16px;
+      overflow:auto;
+    }
     .hero{
+      width:min(860px,100%);
       text-align:center;
-      padding-top: 22px;
-      padding-bottom: 8px;
+      margin-top: 28px;   /* 往下一点 */
+      margin-bottom: 18px;
     }
     .title{
       margin:0;
-      font-weight: 780;
-      font-size: 34px;
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      /* “手写感”：优先用 iOS 自带的手写字体，没有就回退 */
-      font-family: "Snell Roundhand", "Segoe Script", "Bradley Hand", -apple-system, "PingFang SC", sans-serif;
+      font-weight:820;
+      font-size:34px;
+      letter-spacing:-.02em;
+      line-height:1.08;
+      font-family:"Snell Roundhand","Bradley Hand","Segoe Script",-apple-system,"PingFang SC",sans-serif;
     }
     .subtitle{
-      margin: 10px 0 0;
-      font-size: 15.5px;
-      color: var(--muted);
-      line-height: 1.5;
+      margin:10px 0 0;
+      font-size:15.5px;
+      color:var(--muted);
+      line-height:1.55;
     }
 
-    /* 选项整体往下 */
     .grid{
-      margin-top: 34px; /* 👈 选项往下 */
+      width:min(860px,100%);
+      margin-top: 22px;  /* 选项往下一点 */
       display:grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+      padding-bottom: 24px;
     }
-    @media (max-width: 380px){
-      .grid{ grid-template-columns: 1fr; }
-    }
+    @media (max-width:390px){ .grid{grid-template-columns:1fr;} }
 
     .stateBtn{
-      border: 1px solid var(--stroke);
-      background: var(--card);
-      border-radius: 22px;
-      padding: 18px 16px;
+      border:1px solid var(--stroke);
+      background:var(--card);
+      border-radius:22px;
+      padding:18px 16px;
       display:flex;
-      gap: 12px;
       align-items:center;
-      min-height: 86px;
-      box-shadow: var(--shadow2);
-      transition: transform .18s var(--ease), box-shadow .18s var(--ease), background .18s var(--ease);
+      gap:12px;
+      min-height:88px;
+      box-shadow:var(--shadow2);
+      transition:transform .18s var(--ease), box-shadow .18s var(--ease);
       user-select:none;
-      -webkit-tap-highlight-color: transparent;
+      -webkit-tap-highlight-color:transparent;
       cursor:pointer;
     }
-    .stateBtn:active{
-      transform: scale(.985);
-    }
-    .stateBtn:hover{
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-      background: var(--card2);
-    }
+    .stateBtn:hover{transform:translateY(-2px); box-shadow:var(--shadow);}
+    .stateBtn:active{transform:scale(.985);}
 
     .emojiCircle{
-      width: 44px; height: 44px;
-      border-radius: 999px;
+      width:46px;height:46px;
+      border-radius:999px;
       display:grid;
       place-items:center;
-      background: rgba(0,0,0,.04);
-      border: 1px solid rgba(0,0,0,.05);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
-      flex: 0 0 auto;
-      font-size: 22px;
+      background:rgba(0,0,0,.04);
+      border:1px solid rgba(0,0,0,.05);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+      font-size:22px;
+      flex:0 0 auto;
     }
-
-    .stateText{
-      display:flex;
-      flex-direction:column;
-      gap: 4px;
-      min-width:0;
-    }
-    .stateName{
-      font-size: 16px;
-      font-weight: 720;
-      letter-spacing: -0.01em;
-      color: #0b3a8a;
-    }
-    .stateHint{
-      font-size: 12.5px;
-      color: var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+    .stateText{min-width:0; display:flex; flex-direction:column; gap:4px;}
+    .stateName{font-size:16px;font-weight:760;color:#0b3a8a;letter-spacing:-.01em;}
+    .stateHint{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
     .foot{
-      margin-top: 16px;
+      width:min(860px,100%);
       text-align:center;
-      font-size: 12px;
-      color: rgba(0,0,0,.35);
+      font-size:12px;
+      color:rgba(0,0,0,.35);
+      padding-bottom: 20px;
     }
 
-    /* 结果页 */
-    .view{
+    /* RESULT：整体居中 + 往下一点 */
+    .result{
+      height:100%;
       display:none;
-      animation: fadeIn .22s var(--ease) both;
-    }
-    .view.active{ display:block; }
-
-    @keyframes fadeIn{
-      from{ opacity:0; transform: translateY(10px); }
-      to{ opacity:1; transform: translateY(0); }
-    }
-
-    .topRow{
-      display:flex;
       align-items:center;
-      justify-content:space-between;
-      margin-top: 10px;
+      justify-content:flex-start;
+      padding: calc(56px + env(safe-area-inset-top)) 16px 0;
     }
+    .result.active{display:flex;}
 
-    .pill{
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.75);
-      border-radius: 999px;
-      padding: 10px 14px;
-      box-shadow: var(--shadow2);
-      color: rgba(0,0,0,.70);
-      font-weight: 650;
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
+    .resultInner{
+      width:min(860px,100%);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      margin-top: 52px; /* 结果整体往下一点 */
+      padding-bottom: calc(110px + env(safe-area-inset-bottom));
+      animation:fadeIn .22s var(--ease) both;
     }
-    .pill:active{ transform: scale(.98); }
+    @keyframes fadeIn{
+      from{opacity:0; transform:translateY(10px);}
+      to{opacity:1; transform:translateY(0);}
+    }
 
     .card{
-      margin-top: 16px;
-      border: 1px solid var(--stroke);
-      background: var(--card2);
-      border-radius: 28px;
-      padding: 18px;
-      box-shadow: var(--shadow);
+      width:100%;
+      border:1px solid var(--stroke);
+      background:var(--card);
+      border-radius:28px;
+      padding:18px;
+      box-shadow:var(--shadow);
       overflow:hidden;
-      position:relative;
     }
     .accentBar{
-      height: 10px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(29,116,255,.30), rgba(255,153,0,.20));
-      filter: blur(.2px);
-      margin-bottom: 14px;
+      height:10px;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(29,116,255,.30), rgba(255,153,0,.20));
+      margin-bottom:14px;
     }
-
     .hState{
+      margin:0;
+      font-size:28px;
+      font-weight:860;
+      letter-spacing:-.02em;
       display:flex;
       align-items:center;
-      gap: 10px;
-      font-size: 26px;
-      font-weight: 820;
-      letter-spacing:-.02em;
-      margin: 0;
+      gap:10px;
+      justify-content:flex-start;
     }
     .hDecide{
-      margin: 10px 0 0;
-      color: rgba(0,0,0,.68);
-      line-height:1.55;
-      font-size: 15px;
-      white-space: pre-line;
+      margin:10px 0 0;
+      font-size:15px;
+      line-height:1.6;
+      color:rgba(0,0,0,.70);
+      white-space:pre-line;
     }
-
-    .divider{
-      margin: 16px 0;
-      height: 1px;
-      background: rgba(0,0,0,.06);
-    }
-
+    .divider{margin:16px 0; height:1px; background:rgba(0,0,0,.06);}
     .labelSmall{
-      font-size: 12px;
-      color: rgba(0,0,0,.45);
-      font-weight: 700;
+      font-size:12px;
+      color:rgba(0,0,0,.45);
+      font-weight:800;
       letter-spacing:.02em;
-      text-transform: none;
     }
-
     .dish{
-      margin: 8px 0 6px;
-      font-size: 24px;
-      font-weight: 860;
+      margin:8px 0 6px;
+      font-size:26px;
+      font-weight:900;
       letter-spacing:-.02em;
+      transition:opacity .14s var(--ease);
     }
     .dishMeta{
-      margin: 0;
-      font-size: 13px;
-      color: rgba(0,0,0,.52);
-      line-height: 1.5;
-    }
-
-    .ritual{
-      margin-top: 14px;
-      border: 1px solid rgba(0,0,0,.06);
-      background: rgba(0,0,0,.03);
-      border-radius: 18px;
-      padding: 14px;
-      color: rgba(0,0,0,.70);
+      margin:0;
+      font-size:13px;
+      color:rgba(0,0,0,.52);
       line-height:1.55;
-      font-size: 14px;
+      transition:opacity .14s var(--ease);
     }
-    .ritual b{ display:block; margin-bottom:6px; }
+    .ritual{
+      margin-top:14px;
+      border:1px solid rgba(0,0,0,.06);
+      background:rgba(0,0,0,.03);
+      border-radius:18px;
+      padding:14px;
+      font-size:14px;
+      line-height:1.6;
+      color:rgba(0,0,0,.72);
+    }
+    .ritual b{display:block; margin-bottom:6px;}
 
-    /* 底部操作栏 */
-    .sticky{
-      position: fixed;
-      left:0; right:0;
-      bottom: 0;
-      padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
-      background: linear-gradient(180deg, rgba(247,247,247,0), rgba(247,247,247,.86) 22%, rgba(247,247,247,.96));
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(0,0,0,.06);
+    /* 底部按钮：在屏幕中间位置（而不是贴底） */
+    .centerActions{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom: calc(70px + env(safe-area-inset-bottom)); /* 👈 屏幕中间偏下 */
+      width:min(860px, calc(100% - 24px));
       display:none;
-      z-index: 50;
+      z-index:15;
     }
-    .sticky.active{ display:block; }
+    .centerActions.active{display:block;}
 
-    .actions{
-      max-width: 860px;
-      margin: 0 auto;
+    .actionsRow{
       display:flex;
-      gap: 10px;
+      gap:10px;
+      justify-content:center;  /* 👈 3 个按钮在中间 */
+      align-items:center;
     }
-
     .btn{
-      border-radius: 999px;
-      padding: 14px 16px;
-      font-weight: 760;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.85);
-      box-shadow: var(--shadow2);
+      border-radius:999px;
+      padding:14px 16px;
+      font-weight:820;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.88);
+      box-shadow:var(--shadow2);
       cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
       user-select:none;
-      flex:1;
+      -webkit-tap-highlight-color:transparent;
       display:flex;
       justify-content:center;
       align-items:center;
-      gap: 8px;
-      transition: transform .15s var(--ease), box-shadow .15s var(--ease);
+      gap:8px;
+      min-width: 0;
+      transition:transform .15s var(--ease);
     }
-    .btn:active{ transform: scale(.985); }
-
+    .btn:active{transform:scale(.985);}
     .btn.primary{
-      background: #111;
+      background:#111;
       color:#fff;
-      border-color: rgba(0,0,0,.22);
+      border-color:rgba(0,0,0,.22);
     }
     .btn.ghost{
-      background: rgba(255,255,255,.70);
-      color: #0b3a8a;
+      background:rgba(255,255,255,.74);
+      color:#0b3a8a;
     }
+    .btn.wide{flex:1;}
+    .btn.mid{flex:1;}
 
     /* Toast */
     .toast{
-      position: fixed;
-      left: 50%;
-      bottom: 88px;
-      transform: translateX(-50%);
-      background: rgba(17,17,17,.92);
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom: calc(140px + env(safe-area-inset-bottom));
+      background:rgba(17,17,17,.92);
       color:#fff;
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: 13px;
-      box-shadow: 0 14px 40px rgba(0,0,0,.22);
-      opacity: 0;
+      padding:10px 14px;
+      border-radius:999px;
+      font-size:13px;
+      box-shadow:0 14px 40px rgba(0,0,0,.22);
+      opacity:0;
       pointer-events:none;
-      transition: opacity .18s var(--ease), transform .18s var(--ease);
-      z-index: 99;
-      max-width: calc(100% - 24px);
-      text-align:center;
+      transition:opacity .18s var(--ease), transform .18s var(--ease);
+      z-index:99;
+      max-width:calc(100% - 24px);
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
     .toast.show{
-      opacity: 1;
-      transform: translateX(-50%) translateY(-6px);
+      opacity:1;
+      transform:translateX(-50%) translateY(-6px);
     }
+
+    /* 强提醒弹窗：如果系统拦截唤醒，用“再试一次” */
+    .modalMask{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.32);
+      display:none;
+      z-index:200;
+      padding: 18px;
+      align-items:center;
+      justify-content:center;
+    }
+    .modalMask.show{display:flex;}
+    .modal{
+      width:min(520px,100%);
+      border-radius:24px;
+      background:rgba(255,255,255,.96);
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow:0 24px 80px rgba(0,0,0,.22);
+      padding:16px;
+    }
+    .modal h3{margin:0; font-size:16px; font-weight:900;}
+    .modal p{margin:8px 0 14px; color:rgba(0,0,0,.62); line-height:1.55; font-size:13.5px;}
+    .modalRow{display:flex; gap:10px;}
   </style>
 </head>
 
 <body>
-  <div class="wrap">
+  <div class="screen">
+
+    <!-- 返回（只在结果页显示） -->
+    <div class="topLeft" id="topLeft" style="display:none;">
+      <div class="backPill" id="backBtn">← 返回</div>
+    </div>
+
     <!-- HOME -->
-    <section id="home" class="view active">
+    <section class="home" id="home">
       <div class="hero">
         <h1 class="title">说你的 feel，选你的饭</h1>
         <p class="subtitle">不用想。我替你做一个不后悔的决定。</p>
       </div>
 
-      <div class="grid" id="stateGrid">
-        <!-- buttons injected by JS -->
-      </div>
+      <div class="grid" id="grid"></div>
 
       <div class="foot">V1：先把“决定”和“可信度”做对；聪明和个性化放到后期。</div>
     </section>
 
     <!-- RESULT -->
-    <section id="result" class="view">
-      <div class="topRow">
-        <div class="pill" id="backBtn">← 回首页</div>
-      </div>
+    <section class="result" id="result">
+      <div class="resultInner">
+        <div class="card">
+          <div class="accentBar" id="accentBar"></div>
+          <h2 class="hState" id="stateTitle">🙂</h2>
+          <p class="hDecide" id="stateDecide">…</p>
 
-      <div class="card">
-        <div class="accentBar" id="accentBar"></div>
-        <h2 class="hState" id="stateTitle">🙂</h2>
-        <p class="hDecide" id="stateDecide">…</p>
+          <div class="divider"></div>
 
-        <div class="divider"></div>
+          <div class="labelSmall">今天就点这个</div>
+          <div class="dish" id="dishText">—</div>
+          <p class="dishMeta" id="dishMeta">—</p>
 
-        <div class="labelSmall">今天就点这个</div>
-        <div class="dish" id="dishText">—</div>
-        <p class="dishMeta" id="dishMeta">—</p>
-
-        <div class="ritual" id="ritualBox">
-          <b>仪式感（可选）</b>
-          坐下，打开一首喜欢的歌，把这一顿吃完。
+          <div class="ritual" id="ritualBox">
+            <b>仪式感（可选）</b>
+            坐下，打开一首喜欢的歌，把这一顿吃完。
+          </div>
         </div>
       </div>
     </section>
-  </div>
 
-  <!-- Bottom bar -->
-  <div class="sticky" id="sticky">
-    <div class="actions">
-      <div class="btn primary" id="goBtn">去点外卖</div>
-      <div class="btn ghost" id="swapBtn">换一个</div>
-      <div class="btn" id="changeBtn">换个状态</div>
+    <!-- 中间按钮 -->
+    <div class="centerActions" id="actions">
+      <div class="actionsRow">
+        <div class="btn primary wide" id="goBtn">叫外卖</div>
+        <div class="btn ghost mid" id="swapBtn">换一个</div>
+        <div class="btn mid" id="changeBtn">换心情</div>
+      </div>
     </div>
-  </div>
 
-  <div class="toast" id="toast">吃饱了就开心啦✨</div>
+    <div class="toast" id="toast">吃饱了就开心啦✨</div>
+
+    <!-- 强提醒弹窗 -->
+    <div class="modalMask" id="modalMask">
+      <div class="modal">
+        <h3>没唤醒美团？</h3>
+        <p>iOS 有时会拦截自动唤醒。点下面这个按钮会再次用「美团 App」方式打开，并带上搜索词。</p>
+        <div class="modalRow">
+          <div class="btn primary wide" id="retryOpen">再试一次（打开美团 App）</div>
+          <div class="btn wide" id="closeModal">先不打开</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 
   <script>
     /**********************
-     * 0) 状态文案（只放 UI 文案，不放菜）
+     * 0) 文案（只放 UI 文案）
      **********************/
     const STATE_UI = {
       tired:  {
-        emoji:"😮‍💨",
-        name:"累",
+        emoji:"😮‍💨", name:"累",
         decide:"现在这种情况，\n来份热的、能顶住的主食。\n先把状态拉回来，再继续战斗。",
         accent:"linear-gradient(90deg, rgba(29,116,255,.30), rgba(0,0,0,.06))",
-        ritual:"把热的端稳：坐下，喝两口汤再开吃。"
+        ritual:"把热的端稳：先喝两口汤再开吃。"
       },
       sad:    {
-        emoji:"☹️",
-        name:"心情不好",
+        emoji:"☹️", name:"心情不好",
         decide:"现在这种情况，\n来一份熟悉的饭和能量。\n情绪触底反弹，从胃里开始。",
         accent:"linear-gradient(90deg, rgba(255,153,0,.26), rgba(29,116,255,.12))",
-        ritual:"别边刷边吃：五分钟只管吃，别管世界。"
+        ritual:"五分钟只管吃，别管世界。"
       },
       reward: {
-        emoji:"😌",
-        name:"想奖励自己",
+        emoji:"😌", name:"想奖励自己",
         decide:"现在这种情况，\n点一份最“值得”的东西。\n你值得把今天收好。",
         accent:"linear-gradient(90deg, rgba(0,0,0,.10), rgba(255,153,0,.22))",
         ritual:"打开你最爱的歌，把这一顿当成奖杯。"
       },
       rush:   {
-        emoji:"🕙",
-        name:"赶时间",
+        emoji:"🕙", name:"赶时间",
         decide:"现在这种情况，\n选最快、最稳的一餐。\n效率优先，别纠结。",
         accent:"linear-gradient(90deg, rgba(29,116,255,.26), rgba(0,0,0,.08))",
         ritual:"先下单：吃不吃得精致，先别管。"
       },
       decide: {
-        emoji:"🤔",
-        name:"你来决定",
+        emoji:"🤔", name:"你来决定",
         decide:"现在这种情况，\n来份不偏、不刺激、也不糟糕的一餐。\n稳住就赢。",
         accent:"linear-gradient(90deg, rgba(0,0,0,.06), rgba(29,116,255,.18))",
         ritual:"给自己一个小承诺：吃完再做下一件事。"
       }
     };
 
-    const STATE_BTNS = [
+    const HOME_BTNS = [
       { key:"tired",  hint:"热的、能顶住" },
       { key:"sad",    hint:"熟悉的饭，稳一下" },
       { key:"reward", hint:"今天值得" },
@@ -438,7 +452,7 @@
     ];
 
     /**********************
-     * 1) D: 菜品数据（60） + 抽取引擎
+     * 1) 菜品（60）+ 抽取引擎（你后续扩到 200 就在这里加）
      **********************/
     function toKW(label){
       return label
@@ -470,21 +484,21 @@
       { id:"N18", label:"广式炒河粉", cat:"noodle" },
 
       // 🍚 rice 15
-      { id:"R19", label:"鸡丁 + 米饭（不辣）", cat:"rice" },
-      { id:"R20", label:"番茄炒蛋 + 米饭", cat:"rice" },
-      { id:"R21", label:"青椒鸡蛋 + 米饭", cat:"rice" },
-      { id:"R22", label:"豆腐牛肉 + 米饭（微辣）", cat:"rice" },
-      { id:"R23", label:"鸡丁 + 米饭（微辣）", cat:"rice" },
-      { id:"R24", label:"酸甜口肉丝 + 米饭", cat:"rice" },
-      { id:"R25", label:"红烧牛肉 + 米饭（多肉）", cat:"rice" },
-      { id:"R26", label:"黑椒牛柳 + 米饭", cat:"rice" },
-      { id:"R27", label:"咖喱鸡 + 米饭", cat:"rice" },
-      { id:"R28", label:"白切鸡 + 米饭（不油不辣）", cat:"rice" },
-      { id:"R29", label:"清蒸鱼 + 米饭", cat:"rice" },
-      { id:"R30", label:"鸡丝蔬菜 + 米饭", cat:"rice" },
+      { id:"R19", label:"番茄炒蛋 + 米饭", cat:"rice" },
+      { id:"R20", label:"青椒鸡蛋 + 米饭", cat:"rice" },
+      { id:"R21", label:"鸡丝蔬菜 + 米饭", cat:"rice" },
+      { id:"R22", label:"清蒸鱼 + 米饭", cat:"rice" },
+      { id:"R23", label:"白切鸡 + 米饭（不油不辣）", cat:"rice" },
+      { id:"R24", label:"咖喱鸡 + 米饭", cat:"rice" },
+      { id:"R25", label:"黑椒牛柳 + 米饭", cat:"rice" },
+      { id:"R26", label:"红烧牛肉 + 米饭（多肉）", cat:"rice" },
+      { id:"R27", label:"照烧鸡腿 + 米饭", cat:"rice" },
+      { id:"R28", label:"豆腐牛肉 + 米饭（微辣）", cat:"rice" },
+      { id:"R29", label:"酸甜口肉丝 + 米饭", cat:"rice" },
+      { id:"R30", label:"黄焖鸡 + 米饭（偏重口）", cat:"rice" },
       { id:"R31", label:"新疆抓饭（牛肉）", cat:"rice" },
-      { id:"R32", label:"照烧鸡腿 + 米饭", cat:"rice" },
-      { id:"R33", label:"黄焖鸡 + 米饭（偏重口）", cat:"rice" },
+      { id:"R32", label:"烤肉拌饭", cat:"rice" },
+      { id:"R33", label:"鸡丁 + 米饭（不辣）", cat:"rice" },
 
       // 🍲 soft 9
       { id:"S34", label:"皮蛋瘦肉粥（热的）", cat:"soft" },
@@ -497,7 +511,7 @@
       { id:"S41", label:"紫菜蛋花汤 + 米饭", cat:"soft" },
       { id:"S42", label:"冬瓜排骨汤", cat:"soft" },
 
-      // 🍔 fast 9（去重复）
+      // 🍔 fast 9
       { id:"F43", label:"经典牛肉汉堡", cat:"fast" },
       { id:"F44", label:"鸡肉卷", cat:"fast" },
       { id:"F45", label:"火腿芝士三明治", cat:"fast" },
@@ -505,15 +519,16 @@
       { id:"F47", label:"墨西哥鸡肉卷饼", cat:"fast" },
       { id:"F48", label:"披萨（单人份）", cat:"fast" },
       { id:"F49", label:"炸鸡套餐", cat:"fast" },
-      { id:"F51", label:"薯条 + 饮料（应急）", cat:"fast" },
+      { id:"F50", label:"薯条 + 饮料（应急）", cat:"fast" },
+      { id:"F51", label:"饭团/便当（即取）", cat:"fast" },
 
       // 🍖 heavy 6
       { id:"H52", label:"红烧排骨", cat:"heavy" },
       { id:"H53", label:"回锅肉 + 米饭", cat:"heavy" },
-      { id:"H54", label:"烤肉拌饭", cat:"heavy" },
-      { id:"H55", label:"麻辣香锅", cat:"heavy" },
-      { id:"H56", label:"烧烤拼盘", cat:"heavy" },
-      { id:"H57", label:"炸猪排套餐", cat:"heavy" },
+      { id:"H54", label:"麻辣香锅", cat:"heavy" },
+      { id:"H55", label:"烧烤拼盘", cat:"heavy" },
+      { id:"H56", label:"炸猪排套餐", cat:"heavy" },
+      { id:"H57", label:"炸鸡腿 + 可乐（重满足）", cat:"heavy" },
 
       // 🍰 sweet 3
       { id:"T58", label:"奶茶", cat:"sweet" },
@@ -563,16 +578,16 @@
     }
 
     /**********************
-     * 2) 页面逻辑
+     * 2) DOM
      **********************/
     const homeEl = document.getElementById("home");
     const resEl  = document.getElementById("result");
-    const sticky = document.getElementById("sticky");
-    const toast  = document.getElementById("toast");
+    const actionsEl = document.getElementById("actions");
+    const topLeftEl = document.getElementById("topLeft");
 
-    const stateGrid = document.getElementById("stateGrid");
+    const gridEl = document.getElementById("grid");
     const backBtn = document.getElementById("backBtn");
-    const goBtn   = document.getElementById("goBtn");
+    const goBtn = document.getElementById("goBtn");
     const swapBtn = document.getElementById("swapBtn");
     const changeBtn = document.getElementById("changeBtn");
 
@@ -583,10 +598,16 @@
     const dishMeta = document.getElementById("dishMeta");
     const ritualBox = document.getElementById("ritualBox");
 
+    const toast = document.getElementById("toast");
+    const modalMask = document.getElementById("modalMask");
+    const retryOpen = document.getElementById("retryOpen");
+    const closeModal = document.getElementById("closeModal");
+
     let currentMood = null;
     let currentDish = null;
     let lastDishId  = null;
     let jumpedOut   = false;
+    let lastKW      = "";
 
     function showToast(msg){
       toast.textContent = msg;
@@ -595,11 +616,12 @@
       showToast._t = setTimeout(()=>toast.classList.remove("show"), 1500);
     }
 
-    function setView(which){
-      const isHome = (which === "home");
-      homeEl.classList.toggle("active", isHome);
+    function setView(view){
+      const isHome = view === "home";
+      homeEl.style.display = isHome ? "flex" : "none";
       resEl.classList.toggle("active", !isHome);
-      sticky.classList.toggle("active", !isHome);
+      actionsEl.classList.toggle("active", !isHome);
+      topLeftEl.style.display = isHome ? "none" : "block";
     }
 
     function renderResult(){
@@ -615,10 +637,11 @@
         : "—";
 
       ritualBox.innerHTML = `<b>仪式感（可选）</b>${ui.ritual}`;
+
       setView("result");
     }
 
-    function onPickMood(key){
+    function pickMood(key){
       currentMood = key;
       currentDish = pickByMood(currentMood, lastDishId);
       lastDishId = currentDish?.id || null;
@@ -629,7 +652,6 @@
       currentDish = pickByMood(currentMood || "decide", lastDishId);
       lastDishId = currentDish?.id || null;
 
-      // 小动效：切换时文字淡出淡入
       dishText.style.opacity = "0";
       dishMeta.style.opacity = "0";
       setTimeout(()=>{
@@ -642,28 +664,44 @@
       }, 90);
     }
 
+    /**********************
+     * 3) 唤醒美团 App + 搜索
+     * - 第一段：直接 scheme（用户手势触发）
+     * - 第二段：如果系统拦截/没反应，弹窗让用户再点一次（仍然 scheme）
+     **********************/
+    function meituanSchemeURL(kw){
+      // 你可以改 query 参数名；这版是“最大概率”写法
+      return "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
+    }
+
+    function openMeituanAppWithKW(kw){
+      lastKW = kw;
+      jumpedOut = true;
+
+      // 关键：必须由用户点击触发（我们就在按钮点击里调用）
+      const appUrl = meituanSchemeURL(kw);
+
+      // 尝试唤醒
+      window.location.href = appUrl;
+
+      // 如果 900ms 仍然没离开页面，说明可能被拦截 → 弹窗“再试一次”
+      setTimeout(()=>{
+        // 只有在页面仍然可见时才弹（避免已经切走还弹）
+        if(document.visibilityState === "visible"){
+          modalMask.classList.add("show");
+        }
+      }, 900);
+    }
+
     function goWaimai(){
-      alert("新版 goWaimai 生效了");
-  const kw = (currentDish?.kw || currentDish?.label || "").trim();
-  if(!kw){
-    showToast("先选一个再去点外卖🙂");
-    return;
-  }
-
-  jumpedOut = true;
-
-  // ✅ 优先唤醒美团外卖 App（不走网页）
-  const appUrl = "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
-
-  // 给用户一个即时反馈
-  showToast("正在打开美团…");
-
-  // 尝试唤醒 App
-  window.location.href = appUrl;
-
-  // ⚠️ 不做网页兜底（按你要求）
-  // 如果你之后又想要“唤醒失败就去网页”，我再给你加一个可开关的 fallback
-}
+      const kw = (currentDish?.kw || currentDish?.label || "").trim();
+      if(!kw){
+        showToast("先选一个再叫外卖🙂");
+        return;
+      }
+      showToast("正在打开美团…");
+      openMeituanAppWithKW(kw);
+    }
 
     // 从外卖回来，弹一句
     document.addEventListener("visibilitychange", ()=>{
@@ -673,16 +711,30 @@
       }
     });
 
-    // 绑定按钮
-    backBtn.addEventListener("click", ()=>{ setView("home"); });
+    // 弹窗按钮：再试一次（仍然只走 App scheme）
+    retryOpen.addEventListener("click", ()=>{
+      modalMask.classList.remove("show");
+      if(lastKW){
+        window.location.href = meituanSchemeURL(lastKW);
+      }
+    });
+    closeModal.addEventListener("click", ()=> modalMask.classList.remove("show"));
+    modalMask.addEventListener("click", (e)=>{
+      if(e.target === modalMask) modalMask.classList.remove("show");
+    });
+
+    /**********************
+     * 4) 绑定
+     **********************/
+    backBtn.addEventListener("click", ()=> setView("home"));
+    changeBtn.addEventListener("click", ()=> setView("home"));
     swapBtn.addEventListener("click", swapDish);
-    changeBtn.addEventListener("click", ()=>{ setView("home"); });
     goBtn.addEventListener("click", goWaimai);
 
-    // 生成首页按钮
-    function buildHomeButtons(){
-      stateGrid.innerHTML = "";
-      STATE_BTNS.forEach(({key, hint})=>{
+    // 首页按钮生成
+    function buildHome(){
+      gridEl.innerHTML = "";
+      HOME_BTNS.forEach(({key, hint})=>{
         const ui = STATE_UI[key];
         const btn = document.createElement("div");
         btn.className = "stateBtn";
@@ -693,17 +745,17 @@
             <div class="stateHint">${hint}</div>
           </div>
         `;
-        btn.addEventListener("click", ()=>onPickMood(key));
-        stateGrid.appendChild(btn);
+        btn.addEventListener("click", ()=> pickMood(key));
+        gridEl.appendChild(btn);
       });
     }
 
-    buildHomeButtons();
+    buildHome();
     setView("home");
 
     /**********************
      * (可选) Service Worker
-     * 如果你仓库里已有 sw.js，就会注册；没有也不影响。
+     * 如果你更新老是卡缓存：先注释掉下面这段再部署
      **********************/
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.getRegistrations().then(()=> {
