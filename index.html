@@ -2,738 +2,705 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#f7f7f7" />
+
+  <!-- 你仓库里如果已有 manifest.json / icons，请保留这两行；没有也不影响网页运行 -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
   <title>feel · 选你的饭</title>
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#F5F5F7">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="feel">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+
   <style>
     :root{
-      --bg:#f5f5f7;
-      --card:rgba(255,255,255,.92);
-      --stroke:rgba(0,0,0,.08);
-      --text:#111;
-      --muted:#6e6e73;
-      --shadow:0 10px 30px rgba(0,0,0,.08);
-      --shadow2:0 2px 10px rgba(0,0,0,.06);
-      --radius:24px;
-      --pad:18px;
-      --ease:cubic-bezier(.2,.9,.2,1);
+      --bg: #f7f7f7;
+      --card: rgba(255,255,255,.86);
+      --card2: rgba(255,255,255,.96);
+      --stroke: rgba(0,0,0,.06);
+      --text: #111;
+      --muted: rgba(0,0,0,.55);
+      --blue: #1d74ff;
+      --shadow: 0 18px 50px rgba(0,0,0,.08);
+      --shadow2: 0 6px 18px rgba(0,0,0,.06);
+      --r: 22px;
+      --pad: 18px;
+      --ease: cubic-bezier(.2,.9,.2,1);
     }
 
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      background:var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
       color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",
-        "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,Arial,sans-serif;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
+      background:
+        radial-gradient(900px 500px at 50% -120px, rgba(29,116,255,.16), transparent 60%),
+        radial-gradient(700px 380px at 12% 20%, rgba(255,153,0,.10), transparent 60%),
+        radial-gradient(700px 420px at 88% 26%, rgba(0,0,0,.05), transparent 60%),
+        var(--bg);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
       overflow-x:hidden;
     }
 
-    /* Subtle moving background (very light) */
-    .bgGlow{
-      position:fixed; inset:-40vh -30vw auto -30vw;
-      height:80vh;
-      background:
-        radial-gradient(closest-side, rgba(0,0,0,.06), rgba(0,0,0,0)),
-        radial-gradient(closest-side, rgba(0,0,0,.04), rgba(0,0,0,0));
-      filter: blur(22px);
-      opacity:.55;
-      pointer-events:none;
-      transform: translate3d(0,0,0);
-      animation: floatGlow 10s var(--ease) infinite alternate;
-    }
-    @keyframes floatGlow{
-      0%{ transform: translate3d(-2%, -2%, 0) }
-      100%{ transform: translate3d(2%, 2%, 0) }
-    }
-
     .wrap{
-      max-width:860px;
-      margin:0 auto;
-      padding:24px var(--pad) 118px;
-      position:relative;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 22px 16px 120px;
     }
 
-    /* Header */
-    .header{
-      margin-bottom: 10px;
-      animation: fadeUp .55s var(--ease) both;
+    /* 顶部：居中 */
+    .hero{
+      text-align:center;
+      padding-top: 22px;
+      padding-bottom: 8px;
     }
-
-    /* Handwritten title font stack (iOS friendly) */
     .title{
       margin:0;
-      font-size:26px;
-      line-height:1.05;
-      letter-spacing:-0.01em;
-      font-weight:700;
-      font-family:
-        "Snell Roundhand","Bradley Hand","Apple Chancery",
-        "Comic Sans MS", /* last resort */
-        cursive;
+      font-weight: 780;
+      font-size: 34px;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      /* “手写感”：优先用 iOS 自带的手写字体，没有就回退 */
+      font-family: "Snell Roundhand", "Segoe Script", "Bradley Hand", -apple-system, "PingFang SC", sans-serif;
+    }
+    .subtitle{
+      margin: 10px 0 0;
+      font-size: 15.5px;
+      color: var(--muted);
+      line-height: 1.5;
     }
 
-    /* Make the rest feel crisp & “tool-like” */
-    .sub{
-      margin-top:10px;
-      font-size:15px;
-      color:var(--muted);
-      line-height:1.55;
-      letter-spacing:-0.01em;
-      font-weight:520;
-      animation: fadeUp .55s var(--ease) .06s both;
-    }
-
-    /* Home grid */
-    .homeGrid{
-      margin-top:18px;
+    /* 选项整体往下 */
+    .grid{
+      margin-top: 34px; /* 👈 选项往下 */
       display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
     }
-    /* Make the last card centered if odd count */
-    .homeGrid .stateBtn:last-child{
-      grid-column: 1 / -1;
-      max-width: 420px;
-      justify-self:center;
-      width: 100%;
+    @media (max-width: 380px){
+      .grid{ grid-template-columns: 1fr; }
     }
 
     .stateBtn{
-      border:1px solid rgba(255,255,255,.55);
-      background:var(--card);
-      border-radius:var(--radius);
-      padding:18px 14px 16px;
+      border: 1px solid var(--stroke);
+      background: var(--card);
+      border-radius: 22px;
+      padding: 18px 16px;
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      min-height: 86px;
+      box-shadow: var(--shadow2);
+      transition: transform .18s var(--ease), box-shadow .18s var(--ease), background .18s var(--ease);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      cursor:pointer;
+    }
+    .stateBtn:active{
+      transform: scale(.985);
+    }
+    .stateBtn:hover{
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+      background: var(--card2);
+    }
+
+    .emojiCircle{
+      width: 44px; height: 44px;
+      border-radius: 999px;
+      display:grid;
+      place-items:center;
+      background: rgba(0,0,0,.04);
+      border: 1px solid rgba(0,0,0,.05);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+      flex: 0 0 auto;
+      font-size: 22px;
+    }
+
+    .stateText{
       display:flex;
       flex-direction:column;
-      align-items:center;
-      gap:10px;
-      box-shadow: var(--shadow2);
-      backdrop-filter: blur(16px) saturate(180%);
-      -webkit-backdrop-filter: blur(16px) saturate(180%);
-      transform: translateY(14px);
-      opacity:0;
-      animation: popIn .55s var(--ease) both;
-      transition: transform .18s var(--ease), box-shadow .18s var(--ease), filter .18s var(--ease), opacity .18s var(--ease);
-      will-change: transform;
+      gap: 4px;
+      min-width:0;
     }
-    .stateBtn:nth-child(1){ animation-delay:.06s }
-    .stateBtn:nth-child(2){ animation-delay:.10s }
-    .stateBtn:nth-child(3){ animation-delay:.14s }
-    .stateBtn:nth-child(4){ animation-delay:.18s }
-    .stateBtn:nth-child(5){ animation-delay:.22s }
-
-    @keyframes popIn{
-      0%{ transform: translateY(14px); opacity:0 }
-      100%{ transform: translateY(0); opacity:1 }
+    .stateName{
+      font-size: 16px;
+      font-weight: 720;
+      letter-spacing: -0.01em;
+      color: #0b3a8a;
     }
-    @keyframes fadeUp{
-      0%{ transform: translateY(10px); opacity:0 }
-      100%{ transform: translateY(0); opacity:1 }
-    }
-
-    /* Press feels like iOS: lift, not shrink */
-    .stateBtn:active{
-      transform: translateY(-2px);
-      box-shadow: 0 14px 34px rgba(0,0,0,.12);
-      filter: saturate(1.05);
-    }
-
-    .iconCircle{
-      width:58px; height:58px; border-radius:999px;
-      display:flex; align-items:center; justify-content:center;
-      font-size:26px;
-      background: rgba(0,0,0,.04);
-      border: 1px solid rgba(0,0,0,.04);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-      position:relative;
+    .stateHint{
+      font-size: 12.5px;
+      color: var(--muted);
+      white-space:nowrap;
       overflow:hidden;
-    }
-    /* Tiny shine sweep on icons (subtle) */
-    .iconCircle::after{
-      content:"";
-      position:absolute; inset:-40% -60%;
-      background: linear-gradient(120deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0));
-      transform: translateX(-40%) rotate(8deg);
-      opacity:.35;
-      animation: sweep 3.8s var(--ease) infinite;
-    }
-    @keyframes sweep{
-      0%,55%{ transform: translateX(-55%) rotate(8deg); opacity:0 }
-      70%{ opacity:.32 }
-      100%{ transform: translateX(45%) rotate(8deg); opacity:0 }
+      text-overflow:ellipsis;
     }
 
-    /* Card text font: softer but still modern */
-    .stateText{
-      font-size:14.5px;
-      font-weight:650;
-      letter-spacing:-0.01em;
-      color: rgba(0,0,0,.86);
-      font-family:
-        -apple-system,BlinkMacSystemFont,
-        "SF Pro Display","SF Pro Text",
-        "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
-        "Segoe UI",Roboto,Arial,sans-serif;
+    .foot{
+      margin-top: 16px;
+      text-align:center;
+      font-size: 12px;
+      color: rgba(0,0,0,.35);
     }
 
-    .hint{
-      margin-top:14px;
-      font-size:12px;
-      color: rgba(0,0,0,.40);
-      line-height:1.45;
-      animation: fadeUp .55s var(--ease) .14s both;
+    /* 结果页 */
+    .view{
+      display:none;
+      animation: fadeIn .22s var(--ease) both;
+    }
+    .view.active{ display:block; }
+
+    @keyframes fadeIn{
+      from{ opacity:0; transform: translateY(10px); }
+      to{ opacity:1; transform: translateY(0); }
     }
 
-    /* Result */
-    .navRow{
+    .topRow{
       display:flex;
-      gap:10px;
-      margin: 4px 0 12px;
-      animation: fadeUp .45s var(--ease) both;
+      align-items:center;
+      justify-content:space-between;
+      margin-top: 10px;
     }
+
     .pill{
-      border:1px solid rgba(0,0,0,.10);
+      border: 1px solid var(--stroke);
       background: rgba(255,255,255,.75);
-      backdrop-filter: blur(16px) saturate(180%);
-      -webkit-backdrop-filter: blur(16px) saturate(180%);
-      border-radius:999px;
-      padding:10px 12px;
-      font-size:13px;
-      font-weight:700;
-      color: rgba(0,0,0,.75);
-      transition: transform .12s var(--ease);
+      border-radius: 999px;
+      padding: 10px 14px;
+      box-shadow: var(--shadow2);
+      color: rgba(0,0,0,.70);
+      font-weight: 650;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
     }
-    .pill:active{ transform: translateY(-1px); }
+    .pill:active{ transform: scale(.98); }
 
     .card{
-      border: 1px solid rgba(255,255,255,.55);
-      background: var(--card);
+      margin-top: 16px;
+      border: 1px solid var(--stroke);
+      background: var(--card2);
       border-radius: 28px;
       padding: 18px;
       box-shadow: var(--shadow);
-      backdrop-filter: blur(18px) saturate(180%);
-      -webkit-backdrop-filter: blur(18px) saturate(180%);
-      transform-origin: 50% 10%;
-      animation: cardIn .55s var(--ease) both;
-    }
-    @keyframes cardIn{
-      0%{ transform: translateY(14px) scale(.99); opacity:0 }
-      100%{ transform: translateY(0) scale(1); opacity:1 }
-    }
-
-    .accent{
-      height:10px; border-radius:999px;
-      background: linear-gradient(90deg, rgba(0,0,0,.15), rgba(0,0,0,0));
-      margin-bottom: 14px;
-      position:relative;
       overflow:hidden;
+      position:relative;
     }
-    /* Accent shimmer */
-    .accent::after{
-      content:"";
-      position:absolute; inset:0;
-      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0));
-      transform: translateX(-60%);
-      opacity:.22;
-      animation: accentSweep 2.6s var(--ease) infinite;
-    }
-    @keyframes accentSweep{
-      0%,55%{ transform: translateX(-65%); opacity:0 }
-      75%{ opacity:.22 }
-      100%{ transform: translateX(65%); opacity:0 }
+    .accentBar{
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(29,116,255,.30), rgba(255,153,0,.20));
+      filter: blur(.2px);
+      margin-bottom: 14px;
     }
 
-    .stateTitle{
-      font-size:22px;
-      font-weight:850;
-      letter-spacing:-0.02em;
-      margin: 4px 0 10px;
+    .hState{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      font-size: 26px;
+      font-weight: 820;
+      letter-spacing:-.02em;
+      margin: 0;
     }
-
-    .decide{
+    .hDecide{
+      margin: 10px 0 0;
+      color: rgba(0,0,0,.68);
+      line-height:1.55;
+      font-size: 15px;
       white-space: pre-line;
-      font-size: 17px;
-      line-height: 1.7;
-      letter-spacing: -0.01em;
-      color: rgba(0,0,0,.86);
     }
 
     .divider{
-      height:1px;
-      background: rgba(0,0,0,.08);
       margin: 16px 0;
+      height: 1px;
+      background: rgba(0,0,0,.06);
     }
 
-    .label{
+    .labelSmall{
       font-size: 12px;
-      color: rgba(0,0,0,.50);
-      font-weight: 850;
-      letter-spacing: .16em;
-      text-transform: uppercase;
+      color: rgba(0,0,0,.45);
+      font-weight: 700;
+      letter-spacing:.02em;
+      text-transform: none;
     }
 
-    .pick{
-      margin-top: 10px;
-      font-size: 22px;
-      font-weight: 850;
-      letter-spacing: -0.02em;
-      line-height: 1.25;
-      animation: fadeUp .35s var(--ease) both;
+    .dish{
+      margin: 8px 0 6px;
+      font-size: 24px;
+      font-weight: 860;
+      letter-spacing:-.02em;
     }
-
-    .meta{
-      margin-top: 8px;
+    .dishMeta{
+      margin: 0;
       font-size: 13px;
-      color: rgba(0,0,0,.55);
+      color: rgba(0,0,0,.52);
       line-height: 1.5;
-      animation: fadeUp .35s var(--ease) .04s both;
     }
 
-    .module{
+    .ritual{
       margin-top: 14px;
-      padding: 14px;
+      border: 1px solid rgba(0,0,0,.06);
+      background: rgba(0,0,0,.03);
       border-radius: 18px;
-      background: rgba(0,0,0,.04);
-      border: 1px solid rgba(0,0,0,.05);
-      animation: fadeUp .35s var(--ease) .06s both;
-    }
-    .moduleTitle{
-      font-size: 12px;
-      color: rgba(0,0,0,.50);
-      font-weight: 850;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
-    .moduleBody{
-      margin-top: 8px;
+      padding: 14px;
+      color: rgba(0,0,0,.70);
+      line-height:1.55;
       font-size: 14px;
-      color: rgba(0,0,0,.82);
-      line-height: 1.55;
-      font-weight: 650;
-      letter-spacing: -0.01em;
     }
+    .ritual b{ display:block; margin-bottom:6px; }
 
-    /* Sticky action bar */
+    /* 底部操作栏 */
     .sticky{
-      position:fixed; left:0; right:0; bottom:0;
-      padding: 10px 12px 12px;
-      border-top:1px solid rgba(0,0,0,.08);
-      background: rgba(245,245,247,.78);
-      backdrop-filter: blur(18px) saturate(180%);
-      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      position: fixed;
+      left:0; right:0;
+      bottom: 0;
+      padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(247,247,247,0), rgba(247,247,247,.86) 22%, rgba(247,247,247,.96));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(0,0,0,.06);
+      display:none;
+      z-index: 50;
     }
-    .stickyInner{
-      max-width:860px;
-      margin:0 auto;
+    .sticky.active{ display:block; }
+
+    .actions{
+      max-width: 860px;
+      margin: 0 auto;
       display:flex;
       gap: 10px;
-      flex-wrap:wrap;
-      padding: 0 var(--pad);
     }
 
-    .action{
+    .btn{
       border-radius: 999px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-weight: 850;
-      border: 1px solid rgba(0,0,0,.10);
+      padding: 14px 16px;
+      font-weight: 760;
+      border: 1px solid var(--stroke);
       background: rgba(255,255,255,.85);
-      box-shadow: 0 2px 10px rgba(0,0,0,.06);
-      transition: transform .12s var(--ease), box-shadow .12s var(--ease);
+      box-shadow: var(--shadow2);
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      flex:1;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap: 8px;
+      transition: transform .15s var(--ease), box-shadow .15s var(--ease);
     }
-    .action:active{
-      transform: translateY(-1px);
-      box-shadow: 0 10px 20px rgba(0,0,0,.10);
-    }
-    .action.primary{
-      border-color: rgba(0,0,0,.88);
-      background: rgba(0,0,0,.92);
+    .btn:active{ transform: scale(.985); }
+
+    .btn.primary{
+      background: #111;
       color:#fff;
-      box-shadow: 0 10px 26px rgba(0,0,0,.20);
+      border-color: rgba(0,0,0,.22);
     }
-    .action.ghost{
-      background: rgba(255,255,255,.72);
-      color: rgba(0,0,0,.78);
+    .btn.ghost{
+      background: rgba(255,255,255,.70);
+      color: #0b3a8a;
     }
 
-    /* Selection focus effect: when choosing a state, others fade slightly */
-    .dimmed{ opacity:.60; }
-
-    /* Respect reduced motion */
-    @media (prefers-reduced-motion: reduce){
-      .bgGlow, .iconCircle::after, .accent::after { animation: none !important; }
-      .stateBtn, .header, .sub, .hint, .card, .pick, .meta, .module, .navRow { animation: none !important; opacity:1 !important; transform:none !important; }
-      .stateBtn:active, .pill:active, .action:active { transform:none !important; }
+    /* Toast */
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 88px;
+      transform: translateX(-50%);
+      background: rgba(17,17,17,.92);
+      color:#fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.22);
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .18s var(--ease), transform .18s var(--ease);
+      z-index: 99;
+      max-width: calc(100% - 24px);
+      text-align:center;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-6px);
     }
   </style>
 </head>
 
 <body>
-  <div class="bgGlow"></div>
-
   <div class="wrap">
     <!-- HOME -->
-    <section id="home">
-      <div class="header">
+    <section id="home" class="view active">
+      <div class="hero">
         <h1 class="title">说你的 feel，选你的饭</h1>
-        <div class="sub">不用想。我替你做一个不后悔的决定。</div>
+        <p class="subtitle">不用想。我替你做一个不后悔的决定。</p>
       </div>
 
-      <div class="homeGrid">
-        <button class="stateBtn" data-state="tired">
-          <div class="iconCircle">😮‍💨</div>
-          <div class="stateText">累</div>
-        </button>
-
-        <button class="stateBtn" data-state="sad">
-          <div class="iconCircle">☹️</div>
-          <div class="stateText">心情不好</div>
-        </button>
-
-        <button class="stateBtn" data-state="reward">
-          <div class="iconCircle">😌</div>
-          <div class="stateText">想奖励自己</div>
-        </button>
-
-        <button class="stateBtn" data-state="rush">
-          <div class="iconCircle">🕙</div>
-          <div class="stateText">赶时间</div>
-        </button>
-
-        <button class="stateBtn" data-state="decide">
-          <div class="iconCircle">🤔</div>
-          <div class="stateText">你来决定</div>
-        </button>
+      <div class="grid" id="stateGrid">
+        <!-- buttons injected by JS -->
       </div>
 
-      <div class="hint">V1：先把“决定”和“可信度”做对；聪明和个性化留到后期。</div>
+      <div class="foot">V1：先把“决定”和“可信度”做对；聪明和个性化放到后期。</div>
     </section>
 
     <!-- RESULT -->
-    <section id="result" style="display:none;">
-      <div class="navRow">
-        <button class="pill" id="homeBtn">← 回首页</button>
+    <section id="result" class="view">
+      <div class="topRow">
+        <div class="pill" id="backBtn">← 回首页</div>
       </div>
 
-      <div class="card" id="resultCard">
-        <div class="accent" id="accentBar"></div>
-
-        <div class="stateTitle" id="stateTitle"></div>
-        <div class="decide" id="decideText"></div>
+      <div class="card">
+        <div class="accentBar" id="accentBar"></div>
+        <h2 class="hState" id="stateTitle">🙂</h2>
+        <p class="hDecide" id="stateDecide">…</p>
 
         <div class="divider"></div>
 
-        <div class="label">今天就点这个</div>
-        <div class="pick" id="pickText"></div>
-        <div class="meta" id="pickMeta"></div>
+        <div class="labelSmall">今天就点这个</div>
+        <div class="dish" id="dishText">—</div>
+        <p class="dishMeta" id="dishMeta">—</p>
 
-        <div class="module">
-          <div class="moduleTitle" id="moduleTitle"></div>
-          <div class="moduleBody" id="moduleBody"></div>
+        <div class="ritual" id="ritualBox">
+          <b>仪式感（可选）</b>
+          坐下，打开一首喜欢的歌，把这一顿吃完。
         </div>
       </div>
     </section>
   </div>
 
-  <!-- Sticky action bar -->
-  <div class="sticky" id="stickyBar" style="display:none;">
-    <div class="stickyInner">
-      <button class="action primary" id="goBtn">去点外卖</button>
-      <button class="action" id="swapBtn">换一个</button>
-      <button class="action ghost" id="againBtn">换个状态</button>
+  <!-- Bottom bar -->
+  <div class="sticky" id="sticky">
+    <div class="actions">
+      <div class="btn primary" id="goBtn">去点外卖</div>
+      <div class="btn ghost" id="swapBtn">换一个</div>
+      <div class="btn" id="changeBtn">换个状态</div>
     </div>
   </div>
 
-<script>
-/* =========================
-   D: 菜品数据（60）
-   说明：
-   - label：展示文案
-   - kw：跳美团搜索关键词（尽量短、命中高；括号内容会被去掉）
-   - cat：类别（noodle/rice/soft/fast/heavy/sweet）
-   ========================= */
-let currentMood = null;
-let currentDish = null;
-let lastDishId = null;
-function toKW(label){
-  // 去掉括号内容、去掉“+”、去掉多余空格；保留核心关键词
-  return label
-    .replace(/（[^）]*）/g, "")
-    .replace(/\s*\+\s*/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+  <div class="toast" id="toast">吃饱了就开心啦✨</div>
 
-const DISHES = [
-  // 🍜 noodle 18
-  { id:"N01", label:"清汤牛肉面", cat:"noodle" },
-  { id:"N02", label:"红烧牛肉面", cat:"noodle" },
-  { id:"N03", label:"牛腩面", cat:"noodle" },
-  { id:"N04", label:"排骨汤面", cat:"noodle" },
-  { id:"N05", label:"鸡汤面", cat:"noodle" },
-  { id:"N06", label:"酸菜肉丝面", cat:"noodle" },
-  { id:"N07", label:"馄饨面", cat:"noodle" },
-  { id:"N08", label:"日式豚骨拉面", cat:"noodle" },
-  { id:"N09", label:"海鲜汤面", cat:"noodle" },
-  { id:"N10", label:"清汤鸡丝面", cat:"noodle" },
-  { id:"N11", label:"炸酱面", cat:"noodle" },
-  { id:"N12", label:"葱油拌面", cat:"noodle" },
-  { id:"N13", label:"过油肉拌面", cat:"noodle" },
-  { id:"N14", label:"担担面", cat:"noodle" },
-  { id:"N15", label:"牛肉拌面", cat:"noodle" },
-  { id:"N16", label:"牛肉粉丝汤", cat:"noodle" },
-  { id:"N17", label:"酸辣粉", cat:"noodle" },
-  { id:"N18", label:"广式炒河粉", cat:"noodle" },
+  <script>
+    /**********************
+     * 0) 状态文案（只放 UI 文案，不放菜）
+     **********************/
+    const STATE_UI = {
+      tired:  {
+        emoji:"😮‍💨",
+        name:"累",
+        decide:"现在这种情况，\n来份热的、能顶住的主食。\n先把状态拉回来，再继续战斗。",
+        accent:"linear-gradient(90deg, rgba(29,116,255,.30), rgba(0,0,0,.06))",
+        ritual:"把热的端稳：坐下，喝两口汤再开吃。"
+      },
+      sad:    {
+        emoji:"☹️",
+        name:"心情不好",
+        decide:"现在这种情况，\n来一份熟悉的饭和能量。\n情绪触底反弹，从胃里开始。",
+        accent:"linear-gradient(90deg, rgba(255,153,0,.26), rgba(29,116,255,.12))",
+        ritual:"别边刷边吃：五分钟只管吃，别管世界。"
+      },
+      reward: {
+        emoji:"😌",
+        name:"想奖励自己",
+        decide:"现在这种情况，\n点一份最“值得”的东西。\n你值得把今天收好。",
+        accent:"linear-gradient(90deg, rgba(0,0,0,.10), rgba(255,153,0,.22))",
+        ritual:"打开你最爱的歌，把这一顿当成奖杯。"
+      },
+      rush:   {
+        emoji:"🕙",
+        name:"赶时间",
+        decide:"现在这种情况，\n选最快、最稳的一餐。\n效率优先，别纠结。",
+        accent:"linear-gradient(90deg, rgba(29,116,255,.26), rgba(0,0,0,.08))",
+        ritual:"先下单：吃不吃得精致，先别管。"
+      },
+      decide: {
+        emoji:"🤔",
+        name:"你来决定",
+        decide:"现在这种情况，\n来份不偏、不刺激、也不糟糕的一餐。\n稳住就赢。",
+        accent:"linear-gradient(90deg, rgba(0,0,0,.06), rgba(29,116,255,.18))",
+        ritual:"给自己一个小承诺：吃完再做下一件事。"
+      }
+    };
 
-  // 🍚 rice 15
-  { id:"R19", label:"鸡丁 + 米饭（不辣）", cat:"rice" },
-  { id:"R20", label:"番茄炒蛋 + 米饭", cat:"rice" },
-  { id:"R21", label:"青椒鸡蛋 + 米饭", cat:"rice" },
-  { id:"R22", label:"豆腐牛肉 + 米饭（微辣）", cat:"rice" },
-  { id:"R23", label:"鸡丁 + 米饭（微辣）", cat:"rice" },
-  { id:"R24", label:"酸甜口肉丝 + 米饭", cat:"rice" },
-  { id:"R25", label:"红烧牛肉 + 米饭（多肉）", cat:"rice" },
-  { id:"R26", label:"黑椒牛柳 + 米饭", cat:"rice" },
-  { id:"R27", label:"咖喱鸡 + 米饭", cat:"rice" },
-  { id:"R28", label:"白切鸡 + 米饭（不油不辣）", cat:"rice" },
-  { id:"R29", label:"清蒸鱼 + 米饭", cat:"rice" },
-  { id:"R30", label:"鸡丝蔬菜 + 米饭", cat:"rice" },
-  { id:"R31", label:"新疆抓饭（牛肉）", cat:"rice" },
-  { id:"R32", label:"照烧鸡腿 + 米饭", cat:"rice" },
-  { id:"R33", label:"黄焖鸡 + 米饭（偏重口）", cat:"rice" },
-
-  // 🍲 soft 9（粥/汤/软食）
-  { id:"S34", label:"皮蛋瘦肉粥（热的）", cat:"soft" },
-  { id:"S35", label:"鸡丝粥", cat:"soft" },
-  { id:"S36", label:"小米粥 + 小菜", cat:"soft" },
-  { id:"S37", label:"白粥 + 咸菜", cat:"soft" },
-  { id:"S38", label:"南瓜粥", cat:"soft" },
-  { id:"S39", label:"排骨汤 + 米饭", cat:"soft" },
-  { id:"S40", label:"番茄牛腩汤", cat:"soft" },
-  { id:"S41", label:"紫菜蛋花汤 + 米饭", cat:"soft" },
-  { id:"S42", label:"冬瓜排骨汤", cat:"soft" },
-
-  // 🍔 fast 9（去重复版）
-  { id:"F43", label:"经典牛肉汉堡", cat:"fast" },
-  { id:"F44", label:"鸡肉卷", cat:"fast" },
-  { id:"F45", label:"火腿芝士三明治", cat:"fast" },
-  { id:"F46", label:"香烤牛肉三明治（热）", cat:"fast" },
-  { id:"F47", label:"墨西哥鸡肉卷饼", cat:"fast" },
-  { id:"F48", label:"披萨（单人份）", cat:"fast" },
-  { id:"F49", label:"炸鸡套餐", cat:"fast" },
-  // 注意：炸猪排套餐我们归到 heavy（重餐），fast 里不再单独重复
-  { id:"F51", label:"薯条 + 饮料（应急）", cat:"fast" },
-
-  // 🍖 heavy 6（重餐）
-  { id:"H52", label:"红烧排骨", cat:"heavy" },
-  { id:"H53", label:"回锅肉 + 米饭", cat:"heavy" },
-  { id:"H54", label:"烤肉拌饭", cat:"heavy" },
-  { id:"H55", label:"麻辣香锅", cat:"heavy" },
-  { id:"H56", label:"烧烤拼盘", cat:"heavy" },
-  { id:"H57", label:"炸猪排套餐", cat:"heavy" },
-
-  // 🍰 sweet 3
-  { id:"T58", label:"奶茶", cat:"sweet" },
-  { id:"T59", label:"提拉米苏", cat:"sweet" },
-  { id:"T60", label:"冰淇淋", cat:"sweet" },
-].map(d => ({ ...d, kw: toKW(d.label) }));
-
-const POOLS = {
-  noodle: DISHES.filter(d=>d.cat==="noodle"),
-  rice:   DISHES.filter(d=>d.cat==="rice"),
-  soft:   DISHES.filter(d=>d.cat==="soft"),
-  fast:   DISHES.filter(d=>d.cat==="fast"),
-  heavy:  DISHES.filter(d=>d.cat==="heavy"),
-  sweet:  DISHES.filter(d=>d.cat==="sweet"),
-};
-
-/* =========================
-   F: 情绪 -> 类别权重
-   moodKey 用你页面的状态 key（例如 tired/sad/reward/rush/decide）
-   规则：只决定“先抽哪个类别”，再从类别池里随机抽一个菜
-   ========================= */
-
-const WEIGHTS = {
-  // 😮‍💨累：热的、软的优先；快餐少一点；基本不出甜点
-  tired:  { noodle: 42, soft: 30, rice: 22, fast: 6,  heavy: 0,  sweet: 0 },
-
-  // ☹️心情不好：熟悉主食优先，允许一点甜
-  sad:    { rice:   38, noodle: 32, soft: 18, fast: 6,  heavy: 0,  sweet: 6 },
-
-  // 😌奖励自己：重餐/快餐提升，甜点允许
-  reward: { heavy:  34, fast:  28, noodle: 18, rice: 12, soft: 0,  sweet: 8 },
-
-  // 🕙赶时间：快餐/固定饭优先，软食少量兜底
-  rush:   { fast:   52, rice:  28, noodle: 12, soft: 8,  heavy: 0,  sweet: 0 },
-
-  // 🤔你来决定：稳妥为主，自动避开 heavy；甜点不主动出
-  decide: { noodle: 40, rice:  34, soft: 20, fast: 6,  heavy: 0,  sweet: 0 },
-};
-
-function weightedPick(obj){
-  const entries = Object.entries(obj).filter(([,w]) => w > 0);
-  const total = entries.reduce((s,[,w])=>s+w,0);
-  let r = Math.random() * total;
-  for(const [k,w] of entries){
-    r -= w;
-    if(r <= 0) return k;
-  }
-  return entries[entries.length-1][0];
-}
-
-function pickOne(arr, avoidId){
-  if(!arr || arr.length===0) return null;
-  if(!avoidId) return arr[Math.floor(Math.random()*arr.length)];
-  const filtered = arr.filter(x=>x.id!==avoidId);
-  return (filtered.length ? filtered : arr)[Math.floor(Math.random()*(filtered.length?filtered.length:arr.length))];
-}
-
-/**
- * 返回一个菜对象：{id,label,kw,cat}
- * 可传 lastId 让“换一个”尽量不重复
- */
-function pickByMood(moodKey, lastId){
-  const w = WEIGHTS[moodKey] || WEIGHTS.decide;
-  const cat = weightedPick(w);
-  const dish = pickOne(POOLS[cat], lastId);
-  return dish || pickOne(DISHES, lastId);
-}
-
-  function timeBucket(){
-    const h = new Date().getHours();
-    if (h >= 7 && h < 14) return "rush";
-    if (h >= 14 && h < 21) return "tired";
-    return "sad";
-  }
-
-  function picksFor(stateKey){
-    if(stateKey !== "decide") return DATA[stateKey].picks;
-    const bucket = timeBucket();
-    const b = DATA[bucket].picks;
-    return [
-      { dish: b[0].dish, why: `按当前时间：走「${DATA[bucket].title}」公式（最不容易后悔）。`, kw: b[0].kw },
-      { dish: DATA.tired.picks[1].dish, why: "偏恢复：更稳、更容易吃下去。", kw: DATA.tired.picks[1].kw },
-      { dish: DATA.rush.picks[0].dish, why: "偏效率：最快拿到、最少变量。", kw: DATA.rush.picks[0].kw },
+    const STATE_BTNS = [
+      { key:"tired",  hint:"热的、能顶住" },
+      { key:"sad",    hint:"熟悉的饭，稳一下" },
+      { key:"reward", hint:"今天值得" },
+      { key:"rush",   hint:"最快解决" },
+      { key:"decide", hint:"我来挑一个稳的" },
     ];
-  }
 
-  const homeEl = document.getElementById('home');
-  const resEl  = document.getElementById('result');
-  const stickyBar = document.getElementById('stickyBar');
+    /**********************
+     * 1) D: 菜品数据（60） + 抽取引擎
+     **********************/
+    function toKW(label){
+      return label
+        .replace(/（[^）]*）/g, "")
+        .replace(/\s*\+\s*/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
 
-  const accentBar  = document.getElementById('accentBar');
-  const stateTitle = document.getElementById('stateTitle');
-  const decideText = document.getElementById('decideText');
-  const pickText   = document.getElementById('pickText');
-  const pickMeta   = document.getElementById('pickMeta');
+    const DISHES = [
+      // 🍜 noodle 18
+      { id:"N01", label:"清汤牛肉面", cat:"noodle" },
+      { id:"N02", label:"红烧牛肉面", cat:"noodle" },
+      { id:"N03", label:"牛腩面", cat:"noodle" },
+      { id:"N04", label:"排骨汤面", cat:"noodle" },
+      { id:"N05", label:"鸡汤面", cat:"noodle" },
+      { id:"N06", label:"酸菜肉丝面", cat:"noodle" },
+      { id:"N07", label:"馄饨面", cat:"noodle" },
+      { id:"N08", label:"日式豚骨拉面", cat:"noodle" },
+      { id:"N09", label:"海鲜汤面", cat:"noodle" },
+      { id:"N10", label:"清汤鸡丝面", cat:"noodle" },
+      { id:"N11", label:"炸酱面", cat:"noodle" },
+      { id:"N12", label:"葱油拌面", cat:"noodle" },
+      { id:"N13", label:"过油肉拌面", cat:"noodle" },
+      { id:"N14", label:"担担面", cat:"noodle" },
+      { id:"N15", label:"牛肉拌面", cat:"noodle" },
+      { id:"N16", label:"牛肉粉丝汤", cat:"noodle" },
+      { id:"N17", label:"酸辣粉", cat:"noodle" },
+      { id:"N18", label:"广式炒河粉", cat:"noodle" },
 
-  const moduleTitle = document.getElementById('moduleTitle');
-  const moduleBody  = document.getElementById('moduleBody');
+      // 🍚 rice 15
+      { id:"R19", label:"鸡丁 + 米饭（不辣）", cat:"rice" },
+      { id:"R20", label:"番茄炒蛋 + 米饭", cat:"rice" },
+      { id:"R21", label:"青椒鸡蛋 + 米饭", cat:"rice" },
+      { id:"R22", label:"豆腐牛肉 + 米饭（微辣）", cat:"rice" },
+      { id:"R23", label:"鸡丁 + 米饭（微辣）", cat:"rice" },
+      { id:"R24", label:"酸甜口肉丝 + 米饭", cat:"rice" },
+      { id:"R25", label:"红烧牛肉 + 米饭（多肉）", cat:"rice" },
+      { id:"R26", label:"黑椒牛柳 + 米饭", cat:"rice" },
+      { id:"R27", label:"咖喱鸡 + 米饭", cat:"rice" },
+      { id:"R28", label:"白切鸡 + 米饭（不油不辣）", cat:"rice" },
+      { id:"R29", label:"清蒸鱼 + 米饭", cat:"rice" },
+      { id:"R30", label:"鸡丝蔬菜 + 米饭", cat:"rice" },
+      { id:"R31", label:"新疆抓饭（牛肉）", cat:"rice" },
+      { id:"R32", label:"照烧鸡腿 + 米饭", cat:"rice" },
+      { id:"R33", label:"黄焖鸡 + 米饭（偏重口）", cat:"rice" },
 
-  const homeBtn = document.getElementById('homeBtn');
-  const goBtn   = document.getElementById('goBtn');
-  const swapBtn = document.getElementById('swapBtn');
-  const againBtn= document.getElementById('againBtn');
+      // 🍲 soft 9
+      { id:"S34", label:"皮蛋瘦肉粥（热的）", cat:"soft" },
+      { id:"S35", label:"鸡丝粥", cat:"soft" },
+      { id:"S36", label:"小米粥 + 小菜", cat:"soft" },
+      { id:"S37", label:"白粥 + 咸菜", cat:"soft" },
+      { id:"S38", label:"南瓜粥", cat:"soft" },
+      { id:"S39", label:"排骨汤 + 米饭", cat:"soft" },
+      { id:"S40", label:"番茄牛腩汤", cat:"soft" },
+      { id:"S41", label:"紫菜蛋花汤 + 米饭", cat:"soft" },
+      { id:"S42", label:"冬瓜排骨汤", cat:"soft" },
 
-  let currentState = null;
-  let idx = 0;
-let currentMood = null;
-let currentDish = null;
-let lastDishId = null;
-  function showHome(){
-    resEl.style.display  = "none";
-    stickyBar.style.display = "none";
-    homeEl.style.display = "block";
-    currentState = null;
-    idx = 0;
+      // 🍔 fast 9（去重复）
+      { id:"F43", label:"经典牛肉汉堡", cat:"fast" },
+      { id:"F44", label:"鸡肉卷", cat:"fast" },
+      { id:"F45", label:"火腿芝士三明治", cat:"fast" },
+      { id:"F46", label:"香烤牛肉三明治（热）", cat:"fast" },
+      { id:"F47", label:"墨西哥鸡肉卷饼", cat:"fast" },
+      { id:"F48", label:"披萨（单人份）", cat:"fast" },
+      { id:"F49", label:"炸鸡套餐", cat:"fast" },
+      { id:"F51", label:"薯条 + 饮料（应急）", cat:"fast" },
 
-    // reset any dimming
-    document.querySelectorAll('.stateBtn').forEach(b => b.classList.remove('dimmed'));
-  }
+      // 🍖 heavy 6
+      { id:"H52", label:"红烧排骨", cat:"heavy" },
+      { id:"H53", label:"回锅肉 + 米饭", cat:"heavy" },
+      { id:"H54", label:"烤肉拌饭", cat:"heavy" },
+      { id:"H55", label:"麻辣香锅", cat:"heavy" },
+      { id:"H56", label:"烧烤拼盘", cat:"heavy" },
+      { id:"H57", label:"炸猪排套餐", cat:"heavy" },
 
-  function animateSwap(){
-    // small “soft” transition on pick change
-    pickText.style.opacity = 0;
-    pickMeta.style.opacity = 0;
-    setTimeout(()=>{
-      pickText.style.opacity = 1;
-      pickMeta.style.opacity = 1;
-    }, 90);
-  }
+      // 🍰 sweet 3
+      { id:"T58", label:"奶茶", cat:"sweet" },
+      { id:"T59", label:"提拉米苏", cat:"sweet" },
+      { id:"T60", label:"冰淇淋", cat:"sweet" },
+    ].map(d => ({ ...d, kw: toKW(d.label) }));
 
-  function render(stateKey, chosenBtn){
-    currentMood = stateKey;
-currentDish = pickByMood(currentMood, lastDishId);
-lastDishId = currentDish?.id || null;
-    idx = 0;
+    const POOLS = {
+      noodle: DISHES.filter(d=>d.cat==="noodle"),
+      rice:   DISHES.filter(d=>d.cat==="rice"),
+      soft:   DISHES.filter(d=>d.cat==="soft"),
+      fast:   DISHES.filter(d=>d.cat==="fast"),
+      heavy:  DISHES.filter(d=>d.cat==="heavy"),
+      sweet:  DISHES.filter(d=>d.cat==="sweet"),
+    };
 
-    const S = DATA[stateKey];
-    const pick = { dish: currentDish?.label || "", why: "" };
+    const WEIGHTS = {
+      tired:  { noodle: 42, soft: 30, rice: 22, fast: 6,  heavy: 0,  sweet: 0 },
+      sad:    { rice:   38, noodle: 32, soft: 18, fast: 6,  heavy: 0,  sweet: 6 },
+      reward: { heavy:  34, fast:  28, noodle: 18, rice: 12, soft: 0,  sweet: 8 },
+      rush:   { fast:   52, rice:  28, noodle: 12, soft: 8,  heavy: 0,  sweet: 0 },
+      decide: { noodle: 40, rice:  34, soft: 20, fast: 6,  heavy: 0,  sweet: 0 },
+    };
 
-    // dim others a bit right when you choose (feels “alive”)
-    document.querySelectorAll('.stateBtn').forEach(b=>{
-      if(chosenBtn && b !== chosenBtn) b.classList.add('dimmed');
+    function weightedPick(obj){
+      const entries = Object.entries(obj).filter(([,w])=>w>0);
+      const total = entries.reduce((s,[,w])=>s+w,0);
+      let r = Math.random() * total;
+      for(const [k,w] of entries){
+        r -= w;
+        if(r <= 0) return k;
+      }
+      return entries[entries.length-1][0];
+    }
+    function pickOne(arr, avoidId){
+      if(!arr || arr.length===0) return null;
+      if(!avoidId) return arr[Math.floor(Math.random()*arr.length)];
+      const filtered = arr.filter(x=>x.id!==avoidId);
+      const pickArr = filtered.length ? filtered : arr;
+      return pickArr[Math.floor(Math.random()*pickArr.length)];
+    }
+    function pickByMood(moodKey, lastId){
+      const w = WEIGHTS[moodKey] || WEIGHTS.decide;
+      const cat = weightedPick(w);
+      const dish = pickOne(POOLS[cat], lastId);
+      return dish || pickOne(DISHES, lastId);
+    }
+
+    /**********************
+     * 2) 页面逻辑
+     **********************/
+    const homeEl = document.getElementById("home");
+    const resEl  = document.getElementById("result");
+    const sticky = document.getElementById("sticky");
+    const toast  = document.getElementById("toast");
+
+    const stateGrid = document.getElementById("stateGrid");
+    const backBtn = document.getElementById("backBtn");
+    const goBtn   = document.getElementById("goBtn");
+    const swapBtn = document.getElementById("swapBtn");
+    const changeBtn = document.getElementById("changeBtn");
+
+    const accentBar = document.getElementById("accentBar");
+    const stateTitle = document.getElementById("stateTitle");
+    const stateDecide = document.getElementById("stateDecide");
+    const dishText = document.getElementById("dishText");
+    const dishMeta = document.getElementById("dishMeta");
+    const ritualBox = document.getElementById("ritualBox");
+
+    let currentMood = null;
+    let currentDish = null;
+    let lastDishId  = null;
+    let jumpedOut   = false;
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=>toast.classList.remove("show"), 1500);
+    }
+
+    function setView(which){
+      const isHome = (which === "home");
+      homeEl.classList.toggle("active", isHome);
+      resEl.classList.toggle("active", !isHome);
+      sticky.classList.toggle("active", !isHome);
+    }
+
+    function renderResult(){
+      const ui = STATE_UI[currentMood] || STATE_UI.decide;
+
+      accentBar.style.background = ui.accent;
+      stateTitle.textContent = `${ui.emoji} ${ui.name}`;
+      stateDecide.textContent = ui.decide;
+
+      dishText.textContent = currentDish?.label || "—";
+      dishMeta.textContent = currentDish
+        ? `关键词：${currentDish.kw} · 分类：${currentDish.cat}`
+        : "—";
+
+      ritualBox.innerHTML = `<b>仪式感（可选）</b>${ui.ritual}`;
+      setView("result");
+    }
+
+    function onPickMood(key){
+      currentMood = key;
+      currentDish = pickByMood(currentMood, lastDishId);
+      lastDishId = currentDish?.id || null;
+      renderResult();
+    }
+
+    function swapDish(){
+      currentDish = pickByMood(currentMood || "decide", lastDishId);
+      lastDishId = currentDish?.id || null;
+
+      // 小动效：切换时文字淡出淡入
+      dishText.style.opacity = "0";
+      dishMeta.style.opacity = "0";
+      setTimeout(()=>{
+        dishText.textContent = currentDish?.label || "—";
+        dishMeta.textContent = currentDish
+          ? `关键词：${currentDish.kw} · 分类：${currentDish.cat}`
+          : "—";
+        dishText.style.opacity = "1";
+        dishMeta.style.opacity = "1";
+      }, 90);
+    }
+
+    function goWaimai(){
+      const kw = (currentDish?.kw || currentDish?.label || "").trim();
+      if(!kw){
+        showToast("先选一个再去点外卖🙂");
+        return;
+      }
+      jumpedOut = true;
+
+      // iOS / PWA：优先用 https（更稳），再尝试 scheme（部分机型会拦）
+      // 你之前已经能跳到美团搜索，这里保持“稳”的方式
+      const url = `https://waimai.meituan.com/search?keyword=${encodeURIComponent(kw)}`;
+      window.location.href = url;
+    }
+
+    // 从外卖回来，弹一句
+    document.addEventListener("visibilitychange", ()=>{
+      if(document.visibilityState === "visible" && jumpedOut){
+        jumpedOut = false;
+        showToast(Math.random() < 0.5 ? "多吃点🙂" : "吃饱了就开心啦✨");
+      }
     });
 
-    accentBar.style.background = S.accent || "linear-gradient(90deg, rgba(0,0,0,.14), rgba(0,0,0,0))";
-    stateTitle.textContent = S.title;
-    decideText.textContent = S.decide;
+    // 绑定按钮
+    backBtn.addEventListener("click", ()=>{ setView("home"); });
+    swapBtn.addEventListener("click", swapDish);
+    changeBtn.addEventListener("click", ()=>{ setView("home"); });
+    goBtn.addEventListener("click", goWaimai);
 
-    pickText.textContent = picks[idx].dish;
-    pickMeta.textContent = picks[idx].why;
+    // 生成首页按钮
+    function buildHomeButtons(){
+      stateGrid.innerHTML = "";
+      STATE_BTNS.forEach(({key, hint})=>{
+        const ui = STATE_UI[key];
+        const btn = document.createElement("div");
+        btn.className = "stateBtn";
+        btn.innerHTML = `
+          <div class="emojiCircle">${ui.emoji}</div>
+          <div class="stateText">
+            <div class="stateName">${ui.name}</div>
+            <div class="stateHint">${hint}</div>
+          </div>
+        `;
+        btn.addEventListener("click", ()=>onPickMood(key));
+        stateGrid.appendChild(btn);
+      });
+    }
 
-    moduleTitle.textContent = S.moduleTitle || "";
-    moduleBody.textContent  = S.moduleBody || "";
+    buildHomeButtons();
+    setView("home");
 
-    homeEl.style.display = "none";
-    resEl.style.display  = "block";
-    stickyBar.style.display = "block";
-    animateSwap();
-    window.scrollTo({top:0, behavior:"smooth"});
-  }
-
-  function swap(){
-    const picks = picksFor(currentState);
-    idx = (idx + 1) % picks.length;
-    pickText.textContent = picks[idx].dish;
-    pickMeta.textContent = picks[idx].why;
-    animateSwap();
-  }
-
-  // ✅ 保留“尝试唤醒美团 App + 失败回退网页搜索”
-  function go(){
-    const picks = picksFor(currentState);
-    const kw = picks[idx].kw || picks[idx].dish;
-
-    const appUrl = "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
-    const webUrl = "https://waimai.meituan.com/search?keyword=" + encodeURIComponent(kw);
-
-    const start = Date.now();
-    window.location.href = appUrl;
-
-    setTimeout(() => {
-      if (Date.now() - start < 1400) {
-        window.open(webUrl, "_blank");
-      }
-    }, 900);
-  }
-
-  document.querySelectorAll('.stateBtn').forEach(b=>{
-    b.addEventListener('click', ()=>render(b.dataset.state, b));
-  });
-
-  homeBtn.addEventListener('click', showHome);
-  againBtn.addEventListener('click', showHome);
-  swapBtn.addEventListener('click', swap);
-  goBtn.addEventListener('click', go);
-</script>
+    /**********************
+     * (可选) Service Worker
+     * 如果你仓库里已有 sw.js，就会注册；没有也不影响。
+     **********************/
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then(()=> {
+        navigator.serviceWorker.register("sw.js").catch(()=>{});
+      });
+    }
+  </script>
 </body>
 </html>
