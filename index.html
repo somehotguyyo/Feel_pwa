@@ -75,7 +75,7 @@
       width:min(860px,100%);
       text-align:center;
       margin-top: 28px;
-      margin-bottom: 18px;
+      margin-bottom: 12px;
     }
     .title{
       margin:0;
@@ -92,13 +92,14 @@
       line-height:1.55;
     }
 
+    /* ✅ 首页选项整体往下：就改这个数 */
     .grid{
       width:min(860px,100%);
-      margin-top: 22px;
+      margin-top: 46px;   /* 原来靠上：把它加大 */
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:14px;
-      padding-bottom: 16px;
+      padding-bottom: 18px;
     }
     @media (max-width:390px){ .grid{grid-template-columns:1fr;} }
 
@@ -143,7 +144,7 @@
       padding: 10px 0 18px;
     }
 
-    /* RESULT 页面：按你要求“更往下 + 居中 + 距离按钮更近” */
+    /* RESULT */
     .result{
       height:100%;
       display:none;
@@ -160,12 +161,8 @@
       flex-direction:column;
       align-items:center;
       justify-content:flex-start;
-
-      /* ✅ 你圈出来那块：再往下 */
-      padding-top: 94px;
-
-      /* ✅ 给底部按钮留空间，但不要太大（让按钮更贴近卡片） */
-      padding-bottom: calc(140px + env(safe-area-inset-bottom));
+      padding-top: 92px;
+      padding-bottom: calc(150px + env(safe-area-inset-bottom));
     }
 
     .card{
@@ -238,7 +235,7 @@
     }
     .ritual b{display:block; margin-bottom:6px;}
 
-    /* ✅ 三按钮：整体上移（更顺手） */
+    /* 底部按钮：更靠上，更好点 */
     .actions{
       position:fixed;
       left:50%;
@@ -270,7 +267,7 @@
       justify-content:center;
       align-items:center;
       min-width:0;
-      transition:transform .15s var(--ease), opacity .15s var(--ease);
+      transition:transform .15s var(--ease);
     }
     .btn:active{transform:scale(.985);}
     .btn.primary{
@@ -321,7 +318,7 @@
   <section class="home" id="home">
     <div class="hero">
       <h1 class="title">说你的 feel，选你的饭</h1>
-      <p class="subtitle">不用想,我替你做一个决定</p>
+      <p class="subtitle">不用想。我替你做一个不后悔的决定。</p>
     </div>
 
     <div class="grid" id="grid"></div>
@@ -360,9 +357,6 @@
   <div class="toast" id="toast">吃饱了就开心啦✨</div>
 
   <script>
-    /**********************
-     * 状态文案（保持原意，不乱改）
-     **********************/
     const STATE_UI = {
       tired:  { emoji:"😮‍💨", name:"累",
         decide:"现在这种情况，\n直接吃一份热的、有蛋白的主食。\n让它把你拉回状态。",
@@ -399,15 +393,8 @@
       { key:"decide", hint:"我来挑一个稳的" },
     ];
 
-    /**********************
-     * 菜品（你后续继续加到 200）
-     **********************/
     function toKW(label){
-      return label
-        .replace(/（[^）]*）/g, "")
-        .replace(/\s*\+\s*/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
+      return label.replace(/（[^）]*）/g, "").replace(/\s*\+\s*/g, " ").replace(/\s+/g, " ").trim();
     }
 
     const DISHES = [
@@ -421,6 +408,7 @@
       { id:"N08", label:"葱油拌面", cat:"noodle" },
       { id:"N09", label:"担担面", cat:"noodle" },
       { id:"N10", label:"牛肉粉丝汤", cat:"noodle" },
+
       { id:"R11", label:"番茄炒蛋 + 米饭", cat:"rice" },
       { id:"R12", label:"青椒鸡蛋 + 米饭", cat:"rice" },
       { id:"R13", label:"照烧鸡腿 + 米饭", cat:"rice" },
@@ -428,16 +416,20 @@
       { id:"R15", label:"红烧牛肉 + 米饭（多肉）", cat:"rice" },
       { id:"R16", label:"麻婆豆腐 + 米饭", cat:"rice" },
       { id:"R17", label:"新疆抓饭（牛肉）", cat:"rice" },
+
       { id:"S18", label:"皮蛋瘦肉粥（热的）", cat:"soft" },
       { id:"S19", label:"小米粥 + 小菜", cat:"soft" },
       { id:"S20", label:"排骨汤 + 米饭", cat:"soft" },
+
       { id:"F21", label:"经典牛肉汉堡", cat:"fast" },
       { id:"F22", label:"鸡肉卷", cat:"fast" },
       { id:"F23", label:"香烤牛肉三明治", cat:"fast" },
+
       { id:"H24", label:"麻辣香锅", cat:"heavy" },
+
       { id:"T25", label:"奶茶", cat:"sweet" },
       { id:"T26", label:"提拉米苏", cat:"sweet" },
-    ].map(d => ({ ...d, kw: toKW(d.label) }));
+    ].map(d => ({...d, kw: toKW(d.label)}));
 
     const POOLS = {
       noodle: DISHES.filter(d=>d.cat==="noodle"),
@@ -459,30 +451,23 @@
     function weightedPick(obj){
       const entries = Object.entries(obj).filter(([,w])=>w>0);
       const total = entries.reduce((s,[,w])=>s+w,0);
-      let r = Math.random() * total;
-      for(const [k,w] of entries){
-        r -= w;
-        if(r <= 0) return k;
-      }
+      let r = Math.random()*total;
+      for(const [k,w] of entries){ r -= w; if(r<=0) return k; }
       return entries[entries.length-1][0];
     }
     function pickOne(arr, avoidId){
       if(!arr || arr.length===0) return null;
       if(!avoidId) return arr[Math.floor(Math.random()*arr.length)];
       const filtered = arr.filter(x=>x.id!==avoidId);
-      const pickArr = filtered.length ? filtered : arr;
-      return pickArr[Math.floor(Math.random()*pickArr.length)];
+      const src = filtered.length ? filtered : arr;
+      return src[Math.floor(Math.random()*src.length)];
     }
     function pickByMood(moodKey, lastId){
       const w = WEIGHTS[moodKey] || WEIGHTS.decide;
       const cat = weightedPick(w);
-      const dish = pickOne(POOLS[cat], lastId);
-      return dish || pickOne(DISHES, lastId);
+      return pickOne(POOLS[cat], lastId) || pickOne(DISHES, lastId);
     }
 
-    /**********************
-     * DOM
-     **********************/
     const homeEl = document.getElementById("home");
     const resEl  = document.getElementById("result");
     const actionsEl = document.getElementById("actions");
@@ -525,18 +510,13 @@
 
     function renderResult(){
       const ui = STATE_UI[currentMood] || STATE_UI.decide;
-
       accentBar.style.background = ui.accent;
       stateTitle.textContent = `${ui.emoji} ${ui.name}`;
       stateDecide.textContent = ui.decide;
 
       dishText.textContent = currentDish?.label || "—";
-      dishMeta.textContent = currentDish
-        ? `关键词：${currentDish.kw} · 分类：${currentDish.cat}`
-        : "—";
-
+      dishMeta.textContent = currentDish ? `关键词：${currentDish.kw}` : "—";
       ritualBox.innerHTML = `<b>仪式感（可选）</b>${ui.ritual}`;
-
       setView("result");
     }
 
@@ -550,96 +530,38 @@
     function swapDish(){
       currentDish = pickByMood(currentMood || "decide", lastDishId);
       lastDishId = currentDish?.id || null;
-
       dishText.style.opacity = "0";
       dishMeta.style.opacity = "0";
       setTimeout(()=>{
         dishText.textContent = currentDish?.label || "—";
-        dishMeta.textContent = currentDish
-          ? `关键词：${currentDish.kw} · 分类：${currentDish.cat}`
-          : "—";
+        dishMeta.textContent = currentDish ? `关键词：${currentDish.kw}` : "—";
         dishText.style.opacity = "1";
         dishMeta.style.opacity = "1";
       }, 90);
     }
 
-    /**********************
-     * 唤醒美团（A：二次确认，不改）
-     * ✅ 关键变化：第二次点击“同步双发”，更像你当初那次成功触发
-     **********************/
-    let needConfirmOpen = false;
-    let confirmTimer = null;
-
-    function resetConfirm(){
-      needConfirmOpen = false;
-      clearTimeout(confirmTimer);
-      goBtn.textContent = "去点外卖";
-    }
-
-    function meituanSchemeURL(kw){
-      // 保持最朴素、最像当初那次的 scheme
-      return "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
-    }
-
-    function openMeituanNOW_SYNC_DOUBLE(kw){
-      const url = meituanSchemeURL(kw);
-
-      // 1) 最原始：同步 location.href（更像你之前成功那次）
-      try { window.location.href = url; } catch(e){}
-
-      // 2) 同步 iframe 再发一次（iOS/PWA 有时只吃这一口）
-      try{
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = url;
-        document.body.appendChild(iframe);
-        setTimeout(()=>{ try{ document.body.removeChild(iframe);}catch(e){} }, 700);
-      }catch(e){}
-    }
-
+    // ✅ 一次点击：直接唤醒美团（不确认、不网页、不异步花活）
     function goWaimai(){
       const kw = (currentDish?.kw || currentDish?.label || "").trim();
       if(!kw){
         showToast("先选一个再去点外卖🙂");
         return;
       }
-
-      if(!needConfirmOpen){
-        needConfirmOpen = true;
-        goBtn.textContent = "确认打开美团App";
-        showToast("再点一次，确认打开美团App");
-
-        clearTimeout(confirmTimer);
-        confirmTimer = setTimeout(()=>{
-          resetConfirm();
-          showToast("已取消确认");
-        }, 10000);
-
-        return;
-      }
-
-      // 第二次点击：真正唤醒
-      resetConfirm();
       jumpedOut = true;
-      showToast("正在打开美团App…");
 
-      // ✅ 就在用户手势里同步触发（不 setTimeout / 不异步）
-      openMeituanNOW_SYNC_DOUBLE(kw);
+      const url = "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
+      window.location.href = url;
     }
 
     document.addEventListener("visibilitychange", ()=>{
       if(document.visibilityState === "visible" && jumpedOut){
         jumpedOut = false;
-        resetConfirm();
         showToast(Math.random() < 0.5 ? "多吃点🙂" : "吃饱了就开心啦✨");
       }
     });
 
-    /**********************
-     * 绑定
-     **********************/
-    backBtn.addEventListener("click", ()=> { resetConfirm(); setView("home"); });
-    changeBtn.addEventListener("click", ()=> { resetConfirm(); setView("home"); });
+    backBtn.addEventListener("click", ()=> setView("home"));
+    changeBtn.addEventListener("click", ()=> setView("home"));
     swapBtn.addEventListener("click", swapDish);
     goBtn.addEventListener("click", goWaimai);
 
