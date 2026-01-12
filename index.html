@@ -693,35 +693,40 @@
       }, 900);
     }
 
-    function goWaimai(){
-      const kw = (currentDish?.kw || currentDish?.label || "").trim();
-      if(!kw){
-        showToast("先选一个再叫外卖🙂");
-        return;
-      }
-      showToast("正在打开美团…");
-      openMeituanAppWithKW(kw);
+    function openMeituanApp(kw){
+  const url = "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
+
+  // iOS/PWA 更稳的方式：iframe 触发 scheme
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.src = url;
+  document.body.appendChild(iframe);
+
+  // 迅速清理
+  setTimeout(() => {
+    try { document.body.removeChild(iframe); } catch(e) {}
+  }, 800);
+}
+
+function goWaimai(){
+  const kw = (currentDish?.kw || currentDish?.label || "").trim();
+  if(!kw){
+    showToast("先选一个再叫外卖🙂");
+    return;
+  }
+
+  jumpedOut = true;
+
+  // ✅ 必须在“点击当下”同步触发
+  openMeituanApp(kw);
+
+  // 如果 1 秒后还没切走（仍可见），说明被拦了：给出明确提示
+  setTimeout(() => {
+    if (document.visibilityState === "visible") {
+      showToast("iOS 这次没放行，再点一次「叫外卖」");
     }
-
-    // 从外卖回来，弹一句
-    document.addEventListener("visibilitychange", ()=>{
-      if(document.visibilityState === "visible" && jumpedOut){
-        jumpedOut = false;
-        showToast(Math.random() < 0.5 ? "多吃点🙂" : "吃饱了就开心啦✨");
-      }
-    });
-
-    // 弹窗按钮：再试一次（仍然只走 App scheme）
-    retryOpen.addEventListener("click", ()=>{
-      modalMask.classList.remove("show");
-      if(lastKW){
-        window.location.href = meituanSchemeURL(lastKW);
-      }
-    });
-    closeModal.addEventListener("click", ()=> modalMask.classList.remove("show"));
-    modalMask.addEventListener("click", (e)=>{
-      if(e.target === modalMask) modalMask.classList.remove("show");
-    });
+  }, 1000);
+}
 
     /**********************
      * 4) 绑定
