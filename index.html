@@ -453,63 +453,157 @@
   </div>
 
 <script>
-  const DATA = {
-    tired: {
-      title: "😮‍💨 累",
-      accent: "linear-gradient(90deg, rgba(0,0,0,.18), rgba(0,0,0,0))",
-      decide: "现在这种情况，\n直接吃一份热的、有蛋白的主食。\n\n不刺激，能恢复体力，\n吃完状态会慢慢回来。",
-      moduleTitle: "补能搭配",
-      moduleBody: "从「卤蛋 / 煎蛋 / 小菜」里随便选一个就行。别追求完美，先恢复。",
-      picks: [
-        { dish:"清汤牛肉面 + 煎鸡蛋 + 小菜", why:"热 + 蛋白明确 + 清淡，恢复感最强。", kw:"清汤牛肉面 煎蛋 小菜" },
-        { dish:"牛肉粉丝汤 + 卤鸡蛋 + 小菜", why:"更软、更好入口，几乎不踩雷。", kw:"牛肉粉丝汤 卤鸡蛋 小菜" },
-        { dish:"皮蛋粥 + 油条 + 小菜", why:"极度疲惫兜底：消化压力最低。", kw:"皮蛋瘦肉粥 油条 小菜" },
-      ]
-    },
-    sad: {
-      title: "☹️ 心情不好",
-      accent: "linear-gradient(90deg, rgba(0,0,0,.20), rgba(0,0,0,0))",
-      decide: "现在这种情况，\n来一份熟悉、能顶住的饭。\n\n它会把情绪慢慢拉回正常状态。",
-      moduleTitle: "情绪稳住法",
-      moduleBody: "先吃两口再决定要不要喝汽水。目标不是爽，是把情绪拉回“正常线”。",
-      picks: [
-        { dish:"麻婆豆腐盖饭 + 可乐", why:"熟悉 + 轻重口，先止血，再回到正常。", kw:"麻婆豆腐 盖饭" },
-        { dish:"炸酱面 + 雪碧", why:"强“熟悉感”路径：稳定、可预期。", kw:"炸酱面" },
-        { dish:"新疆抓饭 + 可乐", why:"饱腹感最稳，情绪波动时更“顶得住”。", kw:"新疆抓饭" },
-      ]
-    },
-    reward: {
-      title: "😌 想奖励自己",
-      accent: "linear-gradient(90deg, rgba(0,0,0,.16), rgba(0,0,0,0))",
-      decide: "现在这种情况，\n点一份最“值得”的东西。\n\n这是你主动选择的一顿。",
-      moduleTitle: "仪式感（可选）",
-      moduleBody: "别边走边吃：坐下、打开一首喜欢的歌，把这一顿吃完。",
-      picks: [
-        { dish:"牛肉芝士汉堡 + 鸡腿 + 可乐", why:"强满足感：吃完会说“爽了”。", kw:"牛肉 芝士 汉堡 鸡腿" },
-        { dish:"过油肉拌面 + 煎蛋 + 可乐", why:"重口 + 质感：更像“奖励”。", kw:"过油肉 拌面 煎蛋" },
-        { dish:"披萨 / 寿司（二选一）", why:"披萨=庆祝型；寿司=品质型（看你当下想要哪种“值”）。", kw:"披萨 寿司" },
-      ]
-    },
-    rush: {
-      title: "🕙 赶时间",
-      accent: "linear-gradient(90deg, rgba(0,0,0,.24), rgba(0,0,0,0))",
-      decide: "现在最重要的是快和确定。\n\n把这顿饭当作清掉一件待办。",
-      moduleTitle: "最短路径",
-      moduleBody: "打开外卖后，优先选「预计送达最短」的那家，不要赌网红爆款。",
-      picks: [
-        { dish:"Subway 香烤牛肉三明治 + 雪碧", why:"不进厨房路径：时间最可控。", kw:"Subway 香烤牛肉 三明治" },
-        { dish:"鸡肉卷 + 可乐", why:"手持 + 打包快：行动不中断。", kw:"鸡肉卷" },
-        { dish:"青椒鸡蛋盖饭", why:"厨房模板：出餐稳定，最少变量。", kw:"青椒鸡蛋 盖饭" },
-      ]
-    },
-    decide: {
-      title: "🤔 你来决定",
-      accent: "linear-gradient(90deg, rgba(0,0,0,.14), rgba(0,0,0,0))",
-      decide: "现在这种情况，\n来份清淡但完整的一餐。\n\n不偏，不刺激，\n也不会让事情变得更糟。",
-      moduleTitle: "我为什么这么选",
-      moduleBody: "按时间段走“后悔率最低”的那条路：白天偏效率，下午晚上偏恢复，深夜偏稳情绪。"
-    }
-  };
+/* =========================
+   D: 菜品数据（60）
+   说明：
+   - label：展示文案
+   - kw：跳美团搜索关键词（尽量短、命中高；括号内容会被去掉）
+   - cat：类别（noodle/rice/soft/fast/heavy/sweet）
+   ========================= */
+
+function toKW(label){
+  // 去掉括号内容、去掉“+”、去掉多余空格；保留核心关键词
+  return label
+    .replace(/（[^）]*）/g, "")
+    .replace(/\s*\+\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const DISHES = [
+  // 🍜 noodle 18
+  { id:"N01", label:"清汤牛肉面", cat:"noodle" },
+  { id:"N02", label:"红烧牛肉面", cat:"noodle" },
+  { id:"N03", label:"牛腩面", cat:"noodle" },
+  { id:"N04", label:"排骨汤面", cat:"noodle" },
+  { id:"N05", label:"鸡汤面", cat:"noodle" },
+  { id:"N06", label:"酸菜肉丝面", cat:"noodle" },
+  { id:"N07", label:"馄饨面", cat:"noodle" },
+  { id:"N08", label:"日式豚骨拉面", cat:"noodle" },
+  { id:"N09", label:"海鲜汤面", cat:"noodle" },
+  { id:"N10", label:"清汤鸡丝面", cat:"noodle" },
+  { id:"N11", label:"炸酱面", cat:"noodle" },
+  { id:"N12", label:"葱油拌面", cat:"noodle" },
+  { id:"N13", label:"过油肉拌面", cat:"noodle" },
+  { id:"N14", label:"担担面", cat:"noodle" },
+  { id:"N15", label:"牛肉拌面", cat:"noodle" },
+  { id:"N16", label:"牛肉粉丝汤", cat:"noodle" },
+  { id:"N17", label:"酸辣粉", cat:"noodle" },
+  { id:"N18", label:"广式炒河粉", cat:"noodle" },
+
+  // 🍚 rice 15
+  { id:"R19", label:"鸡丁 + 米饭（不辣）", cat:"rice" },
+  { id:"R20", label:"番茄炒蛋 + 米饭", cat:"rice" },
+  { id:"R21", label:"青椒鸡蛋 + 米饭", cat:"rice" },
+  { id:"R22", label:"豆腐牛肉 + 米饭（微辣）", cat:"rice" },
+  { id:"R23", label:"鸡丁 + 米饭（微辣）", cat:"rice" },
+  { id:"R24", label:"酸甜口肉丝 + 米饭", cat:"rice" },
+  { id:"R25", label:"红烧牛肉 + 米饭（多肉）", cat:"rice" },
+  { id:"R26", label:"黑椒牛柳 + 米饭", cat:"rice" },
+  { id:"R27", label:"咖喱鸡 + 米饭", cat:"rice" },
+  { id:"R28", label:"白切鸡 + 米饭（不油不辣）", cat:"rice" },
+  { id:"R29", label:"清蒸鱼 + 米饭", cat:"rice" },
+  { id:"R30", label:"鸡丝蔬菜 + 米饭", cat:"rice" },
+  { id:"R31", label:"新疆抓饭（牛肉）", cat:"rice" },
+  { id:"R32", label:"照烧鸡腿 + 米饭", cat:"rice" },
+  { id:"R33", label:"黄焖鸡 + 米饭（偏重口）", cat:"rice" },
+
+  // 🍲 soft 9（粥/汤/软食）
+  { id:"S34", label:"皮蛋瘦肉粥（热的）", cat:"soft" },
+  { id:"S35", label:"鸡丝粥", cat:"soft" },
+  { id:"S36", label:"小米粥 + 小菜", cat:"soft" },
+  { id:"S37", label:"白粥 + 咸菜", cat:"soft" },
+  { id:"S38", label:"南瓜粥", cat:"soft" },
+  { id:"S39", label:"排骨汤 + 米饭", cat:"soft" },
+  { id:"S40", label:"番茄牛腩汤", cat:"soft" },
+  { id:"S41", label:"紫菜蛋花汤 + 米饭", cat:"soft" },
+  { id:"S42", label:"冬瓜排骨汤", cat:"soft" },
+
+  // 🍔 fast 9（去重复版）
+  { id:"F43", label:"经典牛肉汉堡", cat:"fast" },
+  { id:"F44", label:"鸡肉卷", cat:"fast" },
+  { id:"F45", label:"火腿芝士三明治", cat:"fast" },
+  { id:"F46", label:"香烤牛肉三明治（热）", cat:"fast" },
+  { id:"F47", label:"墨西哥鸡肉卷饼", cat:"fast" },
+  { id:"F48", label:"披萨（单人份）", cat:"fast" },
+  { id:"F49", label:"炸鸡套餐", cat:"fast" },
+  // 注意：炸猪排套餐我们归到 heavy（重餐），fast 里不再单独重复
+  { id:"F51", label:"薯条 + 饮料（应急）", cat:"fast" },
+
+  // 🍖 heavy 6（重餐）
+  { id:"H52", label:"红烧排骨", cat:"heavy" },
+  { id:"H53", label:"回锅肉 + 米饭", cat:"heavy" },
+  { id:"H54", label:"烤肉拌饭", cat:"heavy" },
+  { id:"H55", label:"麻辣香锅", cat:"heavy" },
+  { id:"H56", label:"烧烤拼盘", cat:"heavy" },
+  { id:"H57", label:"炸猪排套餐", cat:"heavy" },
+
+  // 🍰 sweet 3
+  { id:"T58", label:"奶茶", cat:"sweet" },
+  { id:"T59", label:"提拉米苏", cat:"sweet" },
+  { id:"T60", label:"冰淇淋", cat:"sweet" },
+].map(d => ({ ...d, kw: toKW(d.label) }));
+
+const POOLS = {
+  noodle: DISHES.filter(d=>d.cat==="noodle"),
+  rice:   DISHES.filter(d=>d.cat==="rice"),
+  soft:   DISHES.filter(d=>d.cat==="soft"),
+  fast:   DISHES.filter(d=>d.cat==="fast"),
+  heavy:  DISHES.filter(d=>d.cat==="heavy"),
+  sweet:  DISHES.filter(d=>d.cat==="sweet"),
+};
+
+/* =========================
+   F: 情绪 -> 类别权重
+   moodKey 用你页面的状态 key（例如 tired/sad/reward/rush/decide）
+   规则：只决定“先抽哪个类别”，再从类别池里随机抽一个菜
+   ========================= */
+
+const WEIGHTS = {
+  // 😮‍💨累：热的、软的优先；快餐少一点；基本不出甜点
+  tired:  { noodle: 42, soft: 30, rice: 22, fast: 6,  heavy: 0,  sweet: 0 },
+
+  // ☹️心情不好：熟悉主食优先，允许一点甜
+  sad:    { rice:   38, noodle: 32, soft: 18, fast: 6,  heavy: 0,  sweet: 6 },
+
+  // 😌奖励自己：重餐/快餐提升，甜点允许
+  reward: { heavy:  34, fast:  28, noodle: 18, rice: 12, soft: 0,  sweet: 8 },
+
+  // 🕙赶时间：快餐/固定饭优先，软食少量兜底
+  rush:   { fast:   52, rice:  28, noodle: 12, soft: 8,  heavy: 0,  sweet: 0 },
+
+  // 🤔你来决定：稳妥为主，自动避开 heavy；甜点不主动出
+  decide: { noodle: 40, rice:  34, soft: 20, fast: 6,  heavy: 0,  sweet: 0 },
+};
+
+function weightedPick(obj){
+  const entries = Object.entries(obj).filter(([,w]) => w > 0);
+  const total = entries.reduce((s,[,w])=>s+w,0);
+  let r = Math.random() * total;
+  for(const [k,w] of entries){
+    r -= w;
+    if(r <= 0) return k;
+  }
+  return entries[entries.length-1][0];
+}
+
+function pickOne(arr, avoidId){
+  if(!arr || arr.length===0) return null;
+  if(!avoidId) return arr[Math.floor(Math.random()*arr.length)];
+  const filtered = arr.filter(x=>x.id!==avoidId);
+  return (filtered.length ? filtered : arr)[Math.floor(Math.random()*(filtered.length?filtered.length:arr.length))];
+}
+
+/**
+ * 返回一个菜对象：{id,label,kw,cat}
+ * 可传 lastId 让“换一个”尽量不重复
+ */
+function pickByMood(moodKey, lastId){
+  const w = WEIGHTS[moodKey] || WEIGHTS.decide;
+  const cat = weightedPick(w);
+  const dish = pickOne(POOLS[cat], lastId);
+  return dish || pickOne(DISHES, lastId);
+}
 
   function timeBucket(){
     const h = new Date().getHours();
