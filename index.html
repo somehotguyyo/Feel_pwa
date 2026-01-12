@@ -75,7 +75,7 @@
       width:min(860px,100%);
       text-align:center;
       margin-top: 28px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     .title{
       margin:0;
@@ -92,10 +92,10 @@
       line-height:1.55;
     }
 
-    /* ✅ 首页选项整体往下：就改这个数 */
+    /* ✅ 首页选项整体往下：只改这个数 */
     .grid{
       width:min(860px,100%);
-      margin-top: 46px;   /* 原来靠上：把它加大 */
+      margin-top: 80px; /* 更下 */
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:14px;
@@ -161,7 +161,11 @@
       flex-direction:column;
       align-items:center;
       justify-content:flex-start;
-      padding-top: 92px;
+
+      /* ✅ 结果卡片再往下 */
+      padding-top: 108px;
+
+      /* ✅ 卡片和按钮更近 */
       padding-bottom: calc(150px + env(safe-area-inset-bottom));
     }
 
@@ -235,7 +239,7 @@
     }
     .ritual b{display:block; margin-bottom:6px;}
 
-    /* 底部按钮：更靠上，更好点 */
+    /* ✅ 三按钮整体上移：更顺手 */
     .actions{
       position:fixed;
       left:50%;
@@ -246,7 +250,6 @@
       z-index:25;
     }
     .actions.active{display:block;}
-
     .actionsRow{
       display:flex;
       gap:10px;
@@ -318,7 +321,7 @@
   <section class="home" id="home">
     <div class="hero">
       <h1 class="title">说你的 feel，选你的饭</h1>
-      <p class="subtitle">不用想。我替你做一个不后悔的决定。</p>
+      <p class="subtitle">不用想,我替你做一个决定。</p>
     </div>
 
     <div class="grid" id="grid"></div>
@@ -357,6 +360,24 @@
   <div class="toast" id="toast">吃饱了就开心啦✨</div>
 
   <script>
+    /**********************
+     * tap 绑定（修复某些 iPhone click 失灵）
+     **********************/
+    function bindTap(el, fn){
+      if(!el) return;
+      el.addEventListener("touchend", (e)=>{
+        e.preventDefault();
+        fn();
+      }, { passive:false });
+      el.addEventListener("click", (e)=>{
+        e.preventDefault();
+        fn();
+      });
+    }
+
+    /**********************
+     * 状态文案（不改你定的）
+     **********************/
     const STATE_UI = {
       tired:  { emoji:"😮‍💨", name:"累",
         decide:"现在这种情况，\n直接吃一份热的、有蛋白的主食。\n让它把你拉回状态。",
@@ -393,58 +414,183 @@
       { key:"decide", hint:"我来挑一个稳的" },
     ];
 
+    /**********************
+     * 菜单：114 个（fast 24 / noodle 24 / rice 24 / soft 16 / heavy 14 / sweet 12）
+     **********************/
     function toKW(label){
-      return label.replace(/（[^）]*）/g, "").replace(/\s*\+\s*/g, " ").replace(/\s+/g, " ").trim();
+      return label
+        .replace(/（[^）]*）/g, "")
+        .replace(/\s*\+\s*/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+    function make(cat, labels){
+      return labels.map((label, i)=>({
+        id: cat.toUpperCase().slice(0,1) + String(i+1).padStart(2,"0") + "-" + cat,
+        label,
+        cat,
+        kw: toKW(label)
+      }));
     }
 
-    const DISHES = [
-      { id:"N01", label:"清汤牛肉面", cat:"noodle" },
-      { id:"N02", label:"红烧牛肉面", cat:"noodle" },
-      { id:"N03", label:"牛腩面", cat:"noodle" },
-      { id:"N04", label:"鸡汤面", cat:"noodle" },
-      { id:"N05", label:"排骨汤面", cat:"noodle" },
-      { id:"N06", label:"馄饨面", cat:"noodle" },
-      { id:"N07", label:"炸酱面", cat:"noodle" },
-      { id:"N08", label:"葱油拌面", cat:"noodle" },
-      { id:"N09", label:"担担面", cat:"noodle" },
-      { id:"N10", label:"牛肉粉丝汤", cat:"noodle" },
+    // FAST 24（赶时间强优先）
+    const FAST = make("fast", [
+      "麦辣鸡腿堡",
+      "经典牛肉汉堡",
+      "双层芝士牛肉堡",
+      "鸡肉汉堡（不辣）",
+      "鸡肉卷",
+      "墨西哥鸡肉卷饼",
+      "烤牛肉卷",
+      "香烤牛肉三明治",
+      "火腿芝士三明治",
+      "金枪鱼三明治",
+      "照烧鸡腿三明治",
+      "Subway 香烤牛肉 6寸",
+      "Subway 金枪鱼 6寸",
+      "饭团（照烧鸡）",
+      "饭团（金枪鱼）",
+      "便利店便当（鸡排）",
+      "便利店便当（卤肉）",
+      "鸡排饭（快出）",
+      "卤肉饭（快出）",
+      "咖喱鸡饭（快出）",
+      "炸鸡套餐（小份）",
+      "薯条 + 饮料（应急）",
+      "热狗（经典）",
+      "披萨（单人份）"
+    ]);
 
-      { id:"R11", label:"番茄炒蛋 + 米饭", cat:"rice" },
-      { id:"R12", label:"青椒鸡蛋 + 米饭", cat:"rice" },
-      { id:"R13", label:"照烧鸡腿 + 米饭", cat:"rice" },
-      { id:"R14", label:"黑椒牛柳 + 米饭", cat:"rice" },
-      { id:"R15", label:"红烧牛肉 + 米饭（多肉）", cat:"rice" },
-      { id:"R16", label:"麻婆豆腐 + 米饭", cat:"rice" },
-      { id:"R17", label:"新疆抓饭（牛肉）", cat:"rice" },
+    // NOODLE 24（避免“全是牛肉面”）
+    const NOODLE = make("noodle", [
+      "清汤牛肉面",
+      "红烧牛肉面",
+      "牛腩面",
+      "排骨汤面",
+      "鸡汤面",
+      "酸菜肉丝面",
+      "雪菜肉丝面",
+      "榨菜肉丝面",
+      "葱油拌面",
+      "炸酱面",
+      "担担面（微辣）",
+      "热干面",
+      "刀削面（卤肉）",
+      "拉条子拌面",
+      "牛肉拌面",
+      "馄饨面",
+      "鲜肉小馄饨（汤）",
+      "酸辣粉",
+      "牛肉粉丝汤",
+      "砂锅米线（鸡汤）",
+      "过桥米线（简版）",
+      "乌冬面（清汤）",
+      "日式豚骨拉面",
+      "韩式部队锅拉面（小辣）"
+    ]);
 
-      { id:"S18", label:"皮蛋瘦肉粥（热的）", cat:"soft" },
-      { id:"S19", label:"小米粥 + 小菜", cat:"soft" },
-      { id:"S20", label:"排骨汤 + 米饭", cat:"soft" },
+    // RICE 24（不做“食堂菜单感”，更像外卖）
+    const RICE = make("rice", [
+      "黄焖鸡米饭",
+      "卤肉饭",
+      "照烧鸡腿饭",
+      "咖喱鸡饭",
+      "黑椒牛柳饭",
+      "番茄炒蛋盖饭",
+      "青椒鸡蛋盖饭",
+      "鱼香肉丝盖饭",
+      "宫保鸡丁盖饭",
+      "麻婆豆腐盖饭",
+      "回锅肉盖饭（微辣）",
+      "椒麻鸡饭",
+      "三杯鸡盖饭",
+      "肥牛饭（洋葱）",
+      "烤肉拌饭",
+      "新疆抓饭（牛肉）",
+      "鳗鱼饭（简版）",
+      "牛丼（简版）",
+      "韩式拌饭（不辣）",
+      "石锅拌饭（微辣）",
+      "蛋炒饭（加火腿）",
+      "扬州炒饭",
+      "咖喱牛肉饭（微辣）",
+      "红烧排骨饭"
+    ]);
 
-      { id:"F21", label:"经典牛肉汉堡", cat:"fast" },
-      { id:"F22", label:"鸡肉卷", cat:"fast" },
-      { id:"F23", label:"香烤牛肉三明治", cat:"fast" },
+    // SOFT 16（粥/汤/恢复）
+    const SOFT = make("soft", [
+      "皮蛋瘦肉粥",
+      "鸡丝粥",
+      "小米粥 + 小菜",
+      "白粥 + 咸菜",
+      "南瓜粥",
+      "海鲜粥（简版）",
+      "紫菜蛋花汤 + 米饭",
+      "番茄蛋汤 + 米饭",
+      "菌菇鸡汤",
+      "冬瓜排骨汤",
+      "番茄牛腩汤",
+      "玉米排骨汤",
+      "清炖鸡汤",
+      "蒸蛋羹 + 米饭",
+      "清汤小馄饨",
+      "牛肉清汤（粉丝）"
+    ]);
 
-      { id:"H24", label:"麻辣香锅", cat:"heavy" },
+    // HEAVY 14（奖励感）
+    const HEAVY = make("heavy", [
+      "麻辣香锅（加肉）",
+      "烤肉拼盘",
+      "烧烤组合（肉串）",
+      "火锅冒菜（重满足）",
+      "炸鸡桶（小桶）",
+      "披萨（双拼大满足）",
+      "牛排饭（简版）",
+      "鳗鱼饭（加量）",
+      "红烧排骨 + 米饭（加量）",
+      "回锅肉 + 米饭（加量）",
+      "大盘鸡拌面（小份）",
+      "椒麻鸡（整份）",
+      "烤鱼（简版）",
+      "寿司拼盘（加量）"
+    ]);
 
-      { id:"T25", label:"奶茶", cat:"sweet" },
-      { id:"T26", label:"提拉米苏", cat:"sweet" },
-    ].map(d => ({...d, kw: toKW(d.label)}));
+    // SWEET 12（不敷衍）
+    const SWEET = make("sweet", [
+      "奶茶（经典）",
+      "奶茶（乌龙）",
+      "奶盖茶",
+      "杨枝甘露",
+      "冰淇淋（香草）",
+      "冰淇淋（巧克力）",
+      "提拉米苏",
+      "芝士蛋糕",
+      "布丁",
+      "泡芙",
+      "可丽饼",
+      "拿铁（热）"
+    ]);
+
+    const DISHES = [...FAST, ...NOODLE, ...RICE, ...SOFT, ...HEAVY, ...SWEET];
 
     const POOLS = {
-      noodle: DISHES.filter(d=>d.cat==="noodle"),
-      rice:   DISHES.filter(d=>d.cat==="rice"),
-      soft:   DISHES.filter(d=>d.cat==="soft"),
-      fast:   DISHES.filter(d=>d.cat==="fast"),
-      heavy:  DISHES.filter(d=>d.cat==="heavy"),
-      sweet:  DISHES.filter(d=>d.cat==="sweet"),
+      fast: FAST,
+      noodle: NOODLE,
+      rice: RICE,
+      soft: SOFT,
+      heavy: HEAVY,
+      sweet: SWEET
     };
 
+    /**********************
+     * 权重（不乱改你原意）
+     * 重点：rush 强制优先 fast（硬规则）
+     **********************/
     const WEIGHTS = {
       tired:  { noodle: 44, soft: 28, rice: 22, fast: 6,  heavy: 0,  sweet: 0 },
       sad:    { rice:   38, noodle: 32, soft: 18, fast: 6,  heavy: 0,  sweet: 6 },
       reward: { heavy:  34, fast:  28, noodle: 18, rice: 12, soft: 0,  sweet: 8 },
-      rush:   { fast:   52, rice:  28, noodle: 12, soft: 8,  heavy: 0,  sweet: 0 },
+      rush:   { fast:  100, rice: 0,  noodle: 0,  soft: 0,  heavy: 0,  sweet: 0 }, // ✅ 强制
       decide: { noodle: 40, rice:  34, soft: 20, fast: 6,  heavy: 0,  sweet: 0 },
     };
 
@@ -462,12 +608,20 @@
       const src = filtered.length ? filtered : arr;
       return src[Math.floor(Math.random()*src.length)];
     }
+
+    // ✅ 关键：rush 直接从 fast 抽；其他按权重抽
     function pickByMood(moodKey, lastId){
+      if(moodKey === "rush"){
+        return pickOne(POOLS.fast, lastId) || pickOne(DISHES, lastId);
+      }
       const w = WEIGHTS[moodKey] || WEIGHTS.decide;
       const cat = weightedPick(w);
       return pickOne(POOLS[cat], lastId) || pickOne(DISHES, lastId);
     }
 
+    /**********************
+     * DOM
+     **********************/
     const homeEl = document.getElementById("home");
     const resEl  = document.getElementById("result");
     const actionsEl = document.getElementById("actions");
@@ -517,6 +671,7 @@
       dishText.textContent = currentDish?.label || "—";
       dishMeta.textContent = currentDish ? `关键词：${currentDish.kw}` : "—";
       ritualBox.innerHTML = `<b>仪式感（可选）</b>${ui.ritual}`;
+
       setView("result");
     }
 
@@ -530,6 +685,7 @@
     function swapDish(){
       currentDish = pickByMood(currentMood || "decide", lastDishId);
       lastDishId = currentDish?.id || null;
+
       dishText.style.opacity = "0";
       dishMeta.style.opacity = "0";
       setTimeout(()=>{
@@ -540,7 +696,7 @@
       }, 90);
     }
 
-    // ✅ 一次点击：直接唤醒美团（不确认、不网页、不异步花活）
+    // ✅ 一次点击：直接唤醒美团（不确认、不网页、不异步）
     function goWaimai(){
       const kw = (currentDish?.kw || currentDish?.label || "").trim();
       if(!kw){
@@ -548,7 +704,6 @@
         return;
       }
       jumpedOut = true;
-
       const url = "meituanwaimai://waimai.meituan.com/search?query=" + encodeURIComponent(kw);
       window.location.href = url;
     }
@@ -560,10 +715,13 @@
       }
     });
 
-    backBtn.addEventListener("click", ()=> setView("home"));
-    changeBtn.addEventListener("click", ()=> setView("home"));
-    swapBtn.addEventListener("click", swapDish);
-    goBtn.addEventListener("click", goWaimai);
+    /**********************
+     * 绑定（全部用 tap）
+     **********************/
+    bindTap(backBtn, ()=> setView("home"));
+    bindTap(changeBtn, ()=> setView("home"));
+    bindTap(swapBtn, swapDish);
+    bindTap(goBtn, goWaimai);
 
     function buildHome(){
       gridEl.innerHTML = "";
@@ -578,7 +736,7 @@
             <div class="stateHint">${hint}</div>
           </div>
         `;
-        btn.addEventListener("click", ()=> pickMood(key));
+        bindTap(btn, ()=> pickMood(key));
         gridEl.appendChild(btn);
       });
     }
